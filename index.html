@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StableConnect Treasury Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f6ff;--bg-card:#ffffff;--bg-card2:#f8fafc;--bg-hover:#eff6ff;
+  --border:#e2e8f0;--border-strong:#bfdbfe;
+  --text:#1e293b;--text-muted:#64748b;--text-dim:#94a3b8;
+  --blue:#2563eb;--blue-l:#dbeafe;--blue-mid:#93c5fd;
+  --teal:#0891b2;--teal-l:#e0f9ff;
+  --green:#16a34a;--green-l:#dcfce7;
+  --gold:#d97706;--gold-l:#fef9c3;
+  --red:#dc2626;--red-l:#fee2e2;
+  --purple:#7c3aed;--purple-l:#ede9fe;
+  --r:6px;--rm:9px;--rl:12px;--rxl:16px;
+}
+html{font-size:14px}
+body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.c-blue{color:var(--blue)}.c-teal{color:var(--teal)}.c-green{color:var(--green)}.c-gold{color:var(--gold)}.c-red{color:var(--red)}.c-muted{color:var(--text-muted)}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 24px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:60;flex-wrap:wrap;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.hdr-brand{display:flex;align-items:center;gap:10px}
+.hdr-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.hdr-ttl{font-size:14px;font-weight:800;color:var(--text)}
+.hdr-sub{font-size:10.5px;color:var(--text-muted);margin-top:1px}
+.upill{display:flex;align-items:center;gap:7px;padding:5px 12px;background:var(--bg-card2);border:1px solid var(--border);border-radius:20px;font-size:12px}
+.uav{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--teal));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* FX STRIP */
+.fxs{display:flex;gap:6px;flex-wrap:wrap;padding:8px 24px;background:#fff;border-bottom:1px solid var(--border)}
+.fxc{display:flex;align-items:center;gap:5px;padding:4px 11px;background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r);font-size:11px;color:var(--text-muted)}
+.fxc b{color:var(--text);font-weight:600}
+.fxc.alert{background:var(--gold-l);border-color:#fde68a;color:var(--gold)}
+
+/* NAV */
+.nav-wrap{padding:0 20px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:54px;z-index:50;display:flex;overflow-x:auto;gap:0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.nav-btn{padding:11px 13px;font-size:12px;font-weight:500;font-family:'Figtree',sans-serif;border:none;background:transparent;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.nav-btn:hover{color:var(--text);background:var(--bg-hover)}
+.nav-btn.active{color:var(--blue);font-weight:700;border-bottom-color:var(--blue)}
+.nbadge{background:var(--gold);color:#fff;border-radius:8px;padding:1px 6px;font-size:10px;font-weight:800}
+
+/* MAIN */
+.main{padding:20px 24px 60px;max-width:1400px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;font-size:12px;font-weight:500;font-family:'Figtree',sans-serif;border:1px solid var(--border);border-radius:var(--r);background:#fff;color:var(--text);cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--bg-hover);border-color:var(--blue-mid)}
+.btn-prim{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-prim:hover{background:#1d4ed8}
+.btn-ok{background:var(--green-l);color:var(--green);border-color:#86efac;font-weight:700}
+.btn-ok:hover{background:#bbf7d0}
+.btn-danger{background:var(--red-l);color:var(--red);border-color:#fca5a5}
+.btn-danger:hover{background:#fecaca}
+.btn-gold{background:var(--gold-l);color:var(--gold);border-color:#fde68a;font-weight:700}
+.brow{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.rail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.rail-card{border:1px solid var(--border);border-radius:var(--rm);padding:10px 12px;cursor:pointer;transition:all .15s;background:#fff;position:relative}
+.rail-card:hover{border-color:var(--blue-mid);background:var(--blue-l)}
+.rail-card.selected{border-color:var(--blue);background:var(--blue-l);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+.rail-card.recommended{border-color:var(--green);background:var(--green-l)}
+.rail-card.recommended.selected{border-color:var(--green);box-shadow:0 0 0 2px rgba(22,163,74,.15)}
+.rail-rec-tag{position:absolute;top:-7px;left:10px;font-size:9px;font-weight:800;background:var(--green);color:#fff;padding:2px 7px;border-radius:8px;text-transform:uppercase;letter-spacing:.04em}
+.rail-name{font-size:12px;font-weight:700;margin-bottom:2px}
+.rail-meta{font-size:10.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rail-fee{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--blue)}
+.rail-speed{font-size:10px;padding:1px 6px;border-radius:7px;background:#f1f5f9;color:var(--text-muted);font-weight:600}
+/* RAIL SUB-ACCOUNT CARDS */
+.rail-acct-card{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rm);cursor:pointer;background:#fff;transition:all .13s;font-size:12px}
+.rail-acct-card:hover{border-color:var(--blue-mid);background:var(--blue-l)}
+.rail-acct-card.sel{border-color:var(--blue);background:var(--blue-l);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
+.rail-acct-card.insuf{opacity:0.5;cursor:not-allowed}
+/* REJECTION FORM */
+.rej-form{border:1px solid #fca5a5;border-radius:var(--rm);padding:13px;background:#fff5f5;width:100%;margin-top:2px}
+.rej-form .fld label{font-size:10.5px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.05em}
+.rej-form select,.rej-form textarea{font-size:12px;font-family:'Figtree',sans-serif;padding:8px 10px;border:1px solid #fca5a5;border-radius:var(--r);background:#fff;color:var(--text);width:100%;outline:none;margin-top:4px}
+.rej-form select:focus,.rej-form textarea:focus{border-color:var(--red)}
+.rej-form textarea{min-height:70px;resize:vertical}
+/* ACCOUNT SELECTOR */
+.acct-card{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rm);cursor:pointer;background:#fff;transition:all .14s;margin-bottom:5px}
+.acct-card:hover{border-color:var(--blue-mid);background:var(--blue-l)}
+.acct-card.sel{border-color:var(--blue);background:var(--blue-l);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+.acct-bank-hdr{display:flex;align-items:center;justify-content:space-between;padding:6px 11px;background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:4px;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-muted)}
+.acct-bank-hdr:hover{background:var(--bg-hover)}
+.acct-func-lbl{font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;padding:3px 2px 4px;margin-top:4px}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.metric{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:15px 17px;border-top:3px solid var(--ml,var(--blue));transition:box-shadow .15s}
+.metric:hover{box-shadow:0 2px 12px rgba(37,99,235,.08)}
+.metric-lbl{font-size:10.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.metric-val{font-size:22px;font-weight:800;line-height:1;font-family:'JetBrains Mono',monospace}
+.metric-sub{font-size:11px;margin-top:6px;color:var(--text-muted)}
+
+/* CARD */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:13px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;flex-wrap:wrap;gap:7px}
+.ctitle{font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:13px}
+.g-64{display:grid;grid-template-columns:3fr 2fr;gap:13px;margin-bottom:13px}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:7px 9px;text-align:left;color:var(--text-muted);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg-card2)}
+.tbl td{padding:8px 9px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg-hover)}
+.tbl .num{text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px}
+.tbl .foot td{font-weight:700;border-top:2px solid var(--border);border-bottom:none;background:var(--bg-card2);font-family:'JetBrains Mono',monospace}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:9px;font-weight:700;white-space:nowrap}
+.b-g{background:var(--green-l);color:var(--green)}
+.b-a{background:var(--gold-l);color:var(--gold)}
+.b-r{background:var(--red-l);color:var(--red)}
+.b-b{background:var(--blue-l);color:var(--blue)}
+.b-t{background:var(--teal-l);color:var(--teal)}
+.b-p{background:var(--purple-l);color:var(--purple)}
+.b-x{background:#f1f5f9;color:var(--text-muted)}
+.csq{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:9px;background:var(--gold-l);color:var(--gold);border:1px solid #fde68a;font-weight:700}
+.genius-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:9px;background:#ede9fe;color:var(--purple);border:1px solid #c4b5fd;font-weight:700}
+.verified-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 7px;border-radius:9px;background:var(--blue-l);color:var(--blue);font-weight:700}
+
+/* SEG */
+.seg{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;width:fit-content}
+.seg-btn{padding:5px 11px;font-size:11px;font-weight:500;font-family:'Figtree',sans-serif;border:none;background:#fff;color:var(--text-muted);cursor:pointer;border-right:1px solid var(--border);transition:all .12s}
+.seg-btn:last-child{border-right:none}
+.seg-btn.active{background:var(--blue-l);color:var(--blue);font-weight:700}
+.seg-btn:hover:not(.active){background:var(--bg-hover)}
+
+/* FORM */
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.fld input,.fld select,.fld textarea{font-size:13px;font-family:'Figtree',sans-serif;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:#fff;color:var(--text);width:100%;outline:none;transition:border-color .15s}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.fld textarea{resize:vertical;min-height:50px}
+.num-input{font-family:'JetBrains Mono',monospace !important;letter-spacing:.02em}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fg4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+
+/* BOXES */
+.ib,.wb,.pb,.sb,.eb,.gb{padding:10px 13px;border-radius:var(--rm);margin-bottom:11px;font-size:12px;line-height:1.65}
+.ib{background:var(--blue-l);border:1px solid var(--blue-mid);border-left:3px solid var(--blue)}
+.wb{background:var(--gold-l);border:1px solid #fde68a;border-left:3px solid var(--gold)}
+.pb{background:var(--purple-l);border:1px solid #c4b5fd;border-left:3px solid var(--purple)}
+.sb{background:var(--green-l);border:1px solid #86efac;border-left:3px solid var(--green)}
+.eb{background:var(--red-l);border:1px solid #fca5a5;border-left:3px solid var(--red)}
+.gb{background:#f0fdf4;border:1px solid #86efac;border-left:3px solid var(--green)}
+
+/* ALERTS */
+.ar{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--rm);margin-bottom:8px;font-size:12px}
+.ar-w{background:var(--gold-l);border:1px solid #fde68a}
+.ar-e{background:var(--red-l);border:1px solid #fca5a5}
+.ar-s{background:var(--green-l);border:1px solid #86efac}
+.ar-i{background:var(--blue-l);border:1px solid var(--blue-mid)}
+.ar-p{background:var(--purple-l);border:1px solid #c4b5fd}
+.ar-dot{width:7px;height:7px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.ar strong{display:block;font-weight:700}
+.ar small{display:block;font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* DIV ROWS */
+.dr{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:12px}
+.dr:last-child{border-bottom:none}
+.dr-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.dr-main{flex:1;min-width:0}
+.dr-lbl{font-weight:600}
+.dr-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.dr-val{font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+
+/* APPROVAL CARDS */
+.apc{border:1px solid var(--border);border-radius:var(--rxl);padding:16px 18px;margin-bottom:13px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.apc.ny{border-color:var(--blue-mid);background:#fafcff}
+.apc.nt{border-color:#86efac;background:#f0fdf4}
+.apc.fc{border-color:#fde68a;background:#fffdf0}
+.apc.dn{border-color:#86efac;background:#f0fdf4}
+.apc.rj{border-color:#fca5a5;background:#fff5f5}
+.aph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px;flex-wrap:wrap;gap:7px}
+.apt{font-size:13px;font-weight:700}
+.apm{font-size:11px;color:var(--text-muted);margin-top:3px}
+.dg{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:13px;font-size:12px}
+.dl{font-size:10px;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.dv{font-weight:700}
+
+/* SIGNER ROWS */
+.sr{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--rm);margin-bottom:6px;border:1px solid var(--border);background:var(--bg-card2);font-size:12px}
+.sr.sy{border-color:var(--blue-mid);background:var(--blue-l)}
+.sr.sp{border-color:#fde68a;background:var(--gold-l)}
+.sr.sd{border-color:#86efac;background:var(--green-l)}
+.sa{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.si{flex:1}
+.sn{font-weight:700}
+.so{font-size:11px;color:var(--text-muted);margin-top:2px}
+.ss{font-size:11px;font-weight:700;white-space:nowrap}
+
+/* FLOW */
+.flow{display:flex;align-items:center;margin:13px 0}
+.fs{flex:1;text-align:center;padding:9px 5px;background:var(--bg-card2);border:1px solid var(--border);font-size:11px}
+.fs:first-child{border-radius:var(--rm) 0 0 var(--rm)}.fs:last-child{border-radius:0 var(--rm) var(--rm) 0}
+.fs.fsd{background:var(--green-l);border-color:#86efac}
+.fs.fsy{background:var(--blue-l);border-color:var(--blue-mid)}
+.fs strong{display:block;font-weight:700;margin-bottom:2px}
+.fs span{color:var(--text-muted);font-size:10.5px}
+.fa{width:17px;text-align:center;color:var(--text-dim);font-size:13px;flex-shrink:0}
+
+/* LIMIT METERS */
+.lm{margin-bottom:13px}
+.lh{display:flex;justify-content:space-between;margin-bottom:5px;align-items:center}
+.ln{font-size:12px;font-weight:500}
+.lv{font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.lt{height:7px;background:#e2e8f0;border-radius:4px;position:relative;overflow:visible;margin-bottom:4px}
+.lf{height:7px;border-radius:4px;transition:width .4s}
+.lc{position:absolute;top:-4px;width:2px;height:15px;background:var(--red);border-radius:1px}
+.lft{display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted)}
+
+/* SLIDER */
+.sw{margin-bottom:14px}
+.sw-row{display:flex;align-items:center;gap:11px;margin-top:6px}
+input[type=range]{flex:1;height:5px;-webkit-appearance:none;appearance:none;background:#e2e8f0;border-radius:3px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--blue);border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px rgba(37,99,235,.3)}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+.sv{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--blue);min-width:62px;text-align:right}
+
+/* RECEIVER DROPDOWN */
+.rcard{border:1px solid var(--border);border-radius:var(--rm);padding:9px 11px;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px;background:#fff;transition:all .12s}
+.rcard:hover{background:var(--blue-l);border-color:var(--blue-mid)}
+.rcard.frequent{background:#fafcff;border-color:var(--blue-mid)}
+
+/* FEE BOX */
+.fee-box{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--rm);padding:10px 13px;margin-top:10px;font-size:12px}
+.fee-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f1f5f9}
+.fee-row:last-child{border-bottom:none;padding-top:6px;font-weight:700}
+.fee-total{font-family:'JetBrains Mono',monospace;color:var(--blue)}
+
+/* APPROVAL TIER */
+.appr-tier{display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:var(--rm);font-size:12px;font-weight:600;margin-top:10px}
+.appr-none{background:var(--green-l);border:1px solid #86efac;color:var(--green)}
+.appr-treas{background:var(--blue-l);border:1px solid var(--blue-mid);color:var(--blue)}
+.appr-2of2{background:var(--gold-l);border:1px solid #fde68a;color:var(--gold)}
+
+/* GENIUS COMPLIANCE */
+.gc-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:12px}
+.gc-row:last-child{border-bottom:none}
+.gc-status{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700}
+.gc-pass{background:var(--green-l);color:var(--green)}
+.gc-fail{background:var(--red-l);color:var(--red)}
+.gc-warn{background:var(--gold-l);color:var(--gold)}
+.gc-na{background:#f1f5f9;color:var(--text-muted)}
+.gc-bar{height:8px;border-radius:4px;background:#e2e8f0;overflow:hidden;margin-top:4px}
+.gc-fill{height:8px;border-radius:4px}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.md{background:#fff;border:1px solid var(--border);border-radius:var(--rxl);padding:20px;width:100%;max-width:480px;box-shadow:0 10px 40px rgba(0,0,0,.15)}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.mt{font-size:15px;font-weight:800}
+.mc{border:none;background:transparent;font-size:20px;cursor:pointer;color:var(--text-muted);padding:2px 6px;border-radius:4px;line-height:1}
+.mc:hover{background:var(--bg-card2)}
+
+/* SUCCESS MODAL */
+.success-ring{width:56px;height:56px;border-radius:50%;background:var(--green-l);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;border:2px solid #86efac}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#fff;border:1px solid #86efac;border-left:4px solid var(--green);border-radius:var(--rm);padding:12px 16px;box-shadow:0 4px 20px rgba(0,0,0,.12);z-index:300;max-width:340px;font-size:12px;transform:translateX(400px);transition:transform .35s cubic-bezier(.175,.885,.32,1.275)}
+.toast.show{transform:translateX(0)}
+.toast strong{display:block;font-weight:700;margin-bottom:3px}
+
+/* SECTION LABEL */
+.sl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin:16px 0 9px}
+
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--rm);padding:28px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg-card2)}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--blue);background:var(--blue-l)}
+.upload-zone input{display:none}
+
+/* COUNTERPARTY TABLE */
+.cp-bar{height:6px;border-radius:3px;display:inline-block;vertical-align:middle;margin-left:8px}
+
+/* BATCH ERP CARD */
+.erp-pill{display:flex;align-items:center;gap:9px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--rm);background:#fff;cursor:pointer;transition:all .15s;margin-bottom:8px}
+.erp-pill:hover{border-color:var(--blue-mid);background:var(--blue-l)}
+.erp-ico{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.erp-info{flex:1}
+.erp-name{font-weight:700;font-size:12px}
+.erp-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+
+/* ATTACH */
+.attach-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.attach-item{display:flex;align-items:center;gap:7px;padding:6px 10px;background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r);font-size:11px}
+.attach-item button{margin-left:auto;border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:14px;padding:0 2px}
+.attach-item button:hover{color:var(--red)}
+
+@media(max-width:640px){
+  .metrics,.g3,.dg,.fg2,.fg3,.fg4{grid-template-columns:1fr 1fr}
+  .g2,.g-64{grid-template-columns:1fr}
+  .main{padding:12px 12px 48px}
+  .hdr,.fxs{padding:10px 12px}
+  .nav-wrap{padding:0 4px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><strong id="toast-title"></strong><span id="toast-msg"></span></div>
+
+<!-- SUCCESS MODAL -->
+<div class="mo" id="success-modal" style="display:none" onclick="if(event.target===this)closeSuccess()">
+  <div class="md" style="text-align:center;max-width:400px">
+    <div class="success-ring" id="success-icon">✓</div>
+    <div style="font-size:16px;font-weight:800;margin-bottom:8px" id="success-title">Payment submitted</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px" id="success-body"></div>
+    <div id="success-rail-box" style="display:none;background:var(--green-l);border:1px solid #86efac;border-radius:var(--rm);padding:12px;font-size:12px;margin-bottom:16px;text-align:left">
+      <div style="font-weight:700;color:var(--green);margin-bottom:4px" id="success-rail-title"></div>
+      <div id="success-rail-body" style="color:var(--text-muted)"></div>
+    </div>
+    <button class="btn btn-prim" onclick="closeSuccess()" style="width:100%;justify-content:center">Done</button>
+  </div>
+</div>
+
+<!-- ERP EXPORT MODAL -->
+<div class="mo" id="erp-modal" style="display:none" onclick="if(event.target===this)closeErp()">
+  <div class="md">
+    <div class="mh"><span class="mt">Export to ERP system</span><button class="mc" onclick="closeErp()">×</button></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="fld"><label>ERP system</label><select><option>SAP S/4HANA</option><option>Oracle Fusion</option><option>Microsoft Dynamics 365</option><option>NetSuite</option><option>Sage Intacct</option></select></div>
+      <div class="fg2">
+        <div class="fld"><label>Report type</label><select><option>Cash position report</option><option>Yield accrual journal</option><option>Payment log</option><option>FX valuation</option><option>All modules</option></select></div>
+        <div class="fld"><label>Base currency</label><select><option>USD</option><option>GBP</option><option>SGD</option><option>EUR</option></select></div>
+      </div>
+      <div class="fg2">
+        <div class="fld"><label>From</label><input type="date" value="2025-03-01"></div>
+        <div class="fld"><label>To</label><input type="date" value="2025-03-13"></div>
+      </div>
+      <div class="fld"><label>Format</label><select><option>IDoc / BAPI (SAP)</option><option>ISO 20022 camt.053</option><option>XML (OAGIS)</option><option>CSV flat file</option><option>JSON API</option></select></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" checked> FX revaluation</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" checked> Yield accruals</label>
+        <label style="display:flex;align-items:center;gap=5px;font-size:12px;cursor:pointer"><input type="checkbox" checked> Approval audit trail</label>
+      </div>
+    </div>
+    <div class="brow" style="justify-content:flex-end;margin-top:14px">
+      <button class="btn" onclick="closeErp()">Cancel</button>
+      <button class="btn btn-prim" onclick="runErp()">Generate &amp; export ↗</button>
+    </div>
+    <div id="erp-prog" style="display:none;margin-top:12px">
+      <div style="height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden"><div id="erp-bar" style="height:4px;background:var(--blue);border-radius:2px;width:0%;transition:width .35s"></div></div>
+      <div id="erp-st" style="font-size:11px;color:var(--text-muted);margin-top:6px;text-align:center">Preparing…</div>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">SC</div>
+    <div>
+      <div class="hdr-ttl">StableConnect Treasury</div>
+      <div class="hdr-sub">13 Mar 2025, 09:41 UTC</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="seg" id="ccy-seg">
+      <button class="seg-btn active" onclick="setCcy('USD',this)">USD</button>
+      <button class="seg-btn" onclick="setCcy('GBP',this)">GBP</button>
+      <button class="seg-btn" onclick="setCcy('SGD',this)">SGD</button>
+      <button class="seg-btn" onclick="setCcy('EUR',this)">EUR</button>
+    </div>
+    <div class="upill">
+      <div class="uav">ML</div>
+      <span style="font-weight:700">Treasurer</span>
+      <span class="c-muted">· Marcus Lim</span>
+    </div>
+    <button class="btn btn-prim" onclick="openErp()">Export to ERP ↗</button>
+  </div>
+</div>
+
+<!-- FX STRIP -->
+<div class="fxs">
+  <div class="fxc">🇺🇸 <b>USD</b> <span>Base</span></div>
+  <div class="fxc">🇬🇧 <b>GBP/USD</b> <span>0.7920</span></div>
+  <div class="fxc">🇸🇬 <b>SGD/USD</b> <span>1.3420</span></div>
+  <div class="fxc">🇪🇺 <b>EUR/USD</b> <span>0.9210</span></div>
+  <div class="fxc alert">⏳ <b id="pend-fx">2 payments</b> <span>awaiting sign-off</span></div>
+  <div style="margin-left:auto;font-size:11px;color:var(--text-muted);display:flex;align-items:center">Base: <b style="color:var(--text);margin-left:4px" id="ccy-lbl">USD</b></div>
+</div>
+
+<!-- NAV -->
+<div class="nav-wrap">
+  <button class="nav-btn active" onclick="nav(this,'pg-ov')">Overview</button>
+  <button class="nav-btn" onclick="nav(this,'pg-pos')">Position report</button>
+  <button class="nav-btn" onclick="nav(this,'pg-appr')">Sign-off queue <span class="nbadge" id="appr-badge">2</span></button>
+  <button class="nav-btn" onclick="nav(this,'pg-pay')">Payments</button>
+  <button class="nav-btn" onclick="nav(this,'pg-ctrl')">Stablecoin controls</button>
+  <button class="nav-btn" onclick="nav(this,'pg-wall')">Payment wallets</button>
+  <button class="nav-btn" onclick="nav(this,'pg-recv')">Receiver accounts</button>
+  <button class="nav-btn" onclick="nav(this,'pg-recon')">Reconciliation</button>
+  <button class="nav-btn" onclick="nav(this,'pg-genius')">🛡 GENIUS Compliance</button>
+</div>
+
+<div class="main">
+
+<!-- ════ OVERVIEW ════ -->
+<div class="page active" id="pg-ov">
+  <div class="metrics">
+    <div class="metric" style="--ml:var(--blue)"><div class="metric-lbl">Total Cash Under Management</div><div class="metric-val c-blue" id="ov-cum">$284.7M</div><div class="metric-sub c-green">▲ +$6.2M vs yesterday</div></div>
+    <div class="metric" style="--ml:var(--teal)"><div class="metric-lbl">Blended yield</div><div class="metric-val c-teal">3.94%</div><div class="metric-sub">Ann. income ~$11.2M</div></div>
+    <div class="metric" style="--ml:var(--gold)"><div class="metric-lbl">Stablecoin % of Total</div><div class="metric-val c-gold">6.4%</div><div class="metric-sub">Limit <span id="ov-pct-limit">8.0%</span> · $18.2M held</div></div>
+    <div class="metric" style="--ml:var(--gold)"><div class="metric-lbl">Pending sign-off</div><div class="metric-val c-gold" id="ov-pend">2</div><div class="metric-sub">Submitted by treasury team</div></div>
+  </div>
+
+  <div class="pb"><strong>Approval hierarchy (IPS §5.2):</strong> &nbsp;<strong>&lt; $100K</strong> auto-release · <strong>$100K–$500K</strong> Treasurer only · <strong>&gt; $500K</strong> Treasurer + CFO (2-of-2) &nbsp;·&nbsp; <span class="genius-badge">🛡 GENIUS Act compliant</span></div>
+
+  <div class="g-64">
+    <!-- DONUT -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-hdr"><span class="ctitle">Portfolio allocation</span><span style="font-size:11px;color:var(--text-muted)"><span id="ov-cum-label">$284.7M</span> Total Cash Under Management</span></div>
+      <div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap">
+        <div style="width:190px;height:190px;flex-shrink:0;position:relative">
+          <canvas id="donut-chart"></canvas>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;pointer-events:none">
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Total</div>
+            <div style="font-size:17px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--text)" id="donut-center">$284.7M</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:150px">
+          <div style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px"><div style="width:10px;height:10px;border-radius:3px;background:#2563eb;flex-shrink:0"></div><span style="flex:1;font-size:12px;color:var(--text-muted)">Tokenized deposits</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px" id="leg-tok">$85.8M</span><span style="font-size:10.5px;color:var(--text-muted);margin-left:4px">30.1%</span></div>
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px"><div style="width:10px;height:10px;border-radius:3px;background:#0891b2;flex-shrink:0"></div><span style="flex:1;font-size:12px;color:var(--text-muted)">Traditional (MMF/HYSA/CD)</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px" id="leg-trad">$140.2M</span><span style="font-size:10.5px;color:var(--text-muted);margin-left:4px">49.2%</span></div>
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px"><div style="width:10px;height:10px;border-radius:3px;background:#d97706;flex-shrink:0"></div><span style="flex:1;font-size:12px;color:var(--text-muted)">Stablecoins (restricted)</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px" id="leg-sc">$18.2M</span><span style="font-size:10.5px;color:var(--text-muted);margin-left:4px">6.4%</span></div>
+            <div style="display:flex;align-items:center;gap:7px"><div style="width:10px;height:10px;border-radius:3px;background:#94a3b8;flex-shrink:0"></div><span style="flex:1;font-size:12px;color:var(--text-muted)">Fiat fallback</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px" id="leg-fiat">$40.5M</span><span style="font-size:10.5px;color:var(--text-muted);margin-left:4px">14.2%</span></div>
+          </div>
+          <div style="padding-top:12px;border-top:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">YTD yield accrued</div>
+            <div style="font-size:21px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--teal)" id="leg-ytd">$881K</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- YIELD STATS -->
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:13px">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px">
+        <div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Blended yield</div>
+        <div style="font-size:21px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--teal)">3.94%</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Weighted avg across Total Cash Under Management</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px">
+        <div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Best rate instrument</div>
+        <div style="font-size:21px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--green)">4.85%</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">USDC wrapper (employee wallet) <span class="genius-badge">GENIUS ✓</span></div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px">
+        <div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Annualised income</div>
+        <div style="font-size:21px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue)">$11.2M</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">At current rates &amp; balances</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YIELD CHART -->
+  <div class="card">
+    <div class="card-hdr"><span class="ctitle">Yield by instrument</span><span class="genius-badge">🛡 All GENIUS Act compliant</span></div>
+    <div style="height:190px"><canvas id="yield-chart"></canvas></div>
+  </div>
+
+  <!-- COUNTERPARTY EXPOSURE -->
+  <div class="card">
+    <div class="card-hdr"><span class="ctitle">Counterparty exposure</span><span style="font-size:11px;color:var(--text-muted)">Concentration vs. limits</span></div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>Counterparty</th><th>Instruments held</th><th class="num">Exposure</th><th class="num">% of Total</th><th>Limit</th><th>Utilisation</th><th>Risk rating</th><th>Status</th></tr></thead>
+        <tbody id="cp-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="ar ar-w"><div class="ar-dot" style="background:var(--gold)"></div><div><strong>2 payments awaiting your sign-off</strong><small>€3.2M (Supplier GmbH DE) and $285,000 (Taipei Logistics) pending review.</small></div></div>
+  <div class="ar ar-e"><div class="ar-dot" style="background:var(--red)"></div><div><strong>Circle counterparty cap breached</strong><small>$54.2M vs $52.5M ceiling — shift $5M to Kinexys to remediate.</small></div></div>
+  <div class="ar ar-s"><div class="ar-dot" style="background:var(--green)"></div><div><strong>Stablecoin limits compliant</strong><small>6.4% of Total vs <span id="ov-limit-txt">8.0%</span> cap. Employee-use-only policy enforced.</small></div></div>
+  <div class="ar ar-p" style="background:var(--purple-l);border:1px solid #c4b5fd"><div class="ar-dot" style="background:var(--purple)"></div><div><strong>GENIUS Act compliance: 9/9 checks passed</strong><small>All stablecoin holdings meet GENIUS Act reserve, issuer, and disclosure requirements. Full report in GENIUS Compliance tab.</small></div></div>
+</div>
+
+<!-- ════ POSITION REPORT ════ -->
+<div class="page" id="pg-pos">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:9px">
+    <div><div style="font-size:15px;font-weight:800">Cash position report</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">13 Mar 2025, 09:41 UTC · Base: <strong id="pos-ccy">USD</strong></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div class="seg" id="layer-seg">
+        <button class="seg-btn active" onclick="filterLayer('all',this)">All</button>
+        <button class="seg-btn" onclick="filterLayer('reserve',this)">Reserves</button>
+        <button class="seg-btn" onclick="filterLayer('payment',this)">Wallets</button>
+        <button class="seg-btn" onclick="filterLayer('trad',this)">Traditional</button>
+      </div>
+      <button class="btn btn-prim" onclick="openErp()">Export to ERP ↗</button>
+    </div>
+  </div>
+  <div class="card">
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>Account</th><th>Layer</th><th>Provider</th><th>CCY</th><th class="num">Local balance</th><th class="num" id="pos-base-hdr">USD equiv.</th><th class="num">Yield</th><th class="num">Accrued YTD</th><th>Regulation</th><th>GENIUS</th><th>GL</th></tr></thead>
+        <tbody id="pos-body"></tbody>
+        <tfoot id="pos-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="card"><div class="card-hdr"><span class="ctitle">By currency</span></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">🇺🇸 USD</div></div><div class="dr-val">$162.4M</div></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">🇬🇧 GBP</div></div><div class="dr-val">$7.8M</div></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">🇸🇬 SGD</div></div><div class="dr-val">$6.3M</div></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">🇪🇺 EUR</div></div><div class="dr-val">$5.5M</div></div>
+    </div>
+    <div class="card"><div class="card-hdr"><span class="ctitle">By layer</span></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">Tokenized deposits</div></div><div class="dr-val c-blue">$85.8M</div></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">Traditional</div></div><div class="dr-val c-teal">$140.2M</div></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">Stablecoins</div></div><div class="dr-val c-gold">$18.2M</div></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">Fiat fallback</div></div><div class="dr-val">$40.5M</div></div>
+    </div>
+    <div class="card"><div class="card-hdr"><span class="ctitle">ERP sync</span></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">SAP GL last sync</div><div class="dr-sub">GL 1320–1328</div></div><span class="badge b-g">Today 09:12</span></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">Yield accruals</div><div class="dr-sub">$881K YTD</div></div><span class="badge b-g">Posted</span></div>
+      <div class="dr"><div class="dr-main"><div class="dr-lbl">FX revaluation</div><div class="dr-sub">GBP/SGD/EUR</div></div><span class="badge b-a">Pending</span></div>
+      <div class="brow" style="margin-top:8px"><button class="btn btn-prim" style="width:100%;justify-content:center" onclick="openErp()">Export to ERP ↗</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SIGN-OFF QUEUE ════ -->
+<div class="page" id="pg-appr">
+  <div class="metrics">
+    <div class="metric" style="--ml:var(--gold)"><div class="metric-lbl">Awaiting your sign-off</div><div class="metric-val c-gold" id="pend-cnt">2</div><div class="metric-sub">Submitted by treasury staff</div></div>
+    <div class="metric" style="--ml:var(--blue)"><div class="metric-lbl">USD value pending</div><div class="metric-val">$3.8M</div><div class="metric-sub">Your sign releases or forwards to CFO</div></div>
+    <div class="metric" style="--ml:var(--teal)"><div class="metric-lbl">Thresholds</div><div class="metric-val" style="font-size:16px;line-height:1.4">&lt;$100K / $500K</div><div class="metric-sub">Auto · Treasurer · 2-of-2</div></div>
+    <div class="metric" style="--ml:var(--green)"><div class="metric-lbl">Signed this month</div><div class="metric-val c-green">14</div><div class="metric-sub">Avg 2h turnaround</div></div>
+  </div>
+  <div class="ib"><strong>Your role (Marcus Lim — Treasurer):</strong> You are <strong>Signer 1</strong>. &lt;$100K auto-releases · $100K–$500K you sign and it settles · &gt;$500K your signature forwards to <strong>CFO Sarah Chen (Signer 2)</strong>.</div>
+  <div class="flow">
+    <div class="fs fsd"><strong>① Submit</strong><span>Treasury employee</span></div>
+    <div class="fa">→</div>
+    <div class="fs fsy"><strong>② Treasurer</strong><span style="color:var(--blue);font-weight:700">Marcus Lim (you)</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><strong>③ CFO</strong><span>&gt;$500K only · Sarah Chen</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><strong>④ Release</strong><span>Wallet settles</span></div>
+  </div>
+  <div class="sl">Awaiting your sign-off</div>
+
+  <!-- A1: 2-of-2 -->
+  <div class="apc ny" id="card-A1">
+    <div class="aph">
+      <div><div class="apt">Supplier GmbH (DE) — Trade settlement</div><div class="apm">Submitted by <strong>M. Torres (Treasury Analyst)</strong> · 13 Mar 09:05 UTC · Expires 14 Mar 09:05</div></div>
+      <span class="csq">⚡ 2-of-2 required</span>
+    </div>
+    <div class="dg">
+      <div><div class="dl">Amount</div><div class="dv">€3,200,000<br><span style="font-weight:400;font-size:11px;color:var(--text-muted)">≈ $3,474,000 USD</span></div></div>
+      <div><div class="dl">Wallet</div><div class="dv"><span class="badge b-b">Kinexys</span></div></div>
+      <div><div class="dl">Receiver</div><div class="dv">Supplier GmbH DE<br><span style="font-weight:400;font-size:11px;color:var(--text-muted)">IBAN DE89 3704…</span></div></div>
+      <div><div class="dl">Reference</div><div class="dv">INV-2025-0341</div></div>
+    </div>
+    <div class="sr"><div class="sa" style="background:#f1f5f9;color:var(--text-muted)">MT</div><div class="si"><div class="sn">M. Torres — Treasury Analyst</div><div class="so">Submitter</div></div><span class="ss c-green">✓ Submitted 09:05</span></div>
+    <div class="sr sy"><div class="sa" style="background:var(--blue-l);color:var(--blue)">ML</div><div class="si"><div class="sn">Marcus Lim — Treasurer (you)</div><div class="so">Signer 1 · sign first</div></div><span class="ss c-gold" id="jp-A1">⏳ Awaiting you</span></div>
+    <div class="sr sp"><div class="sa" style="background:var(--gold-l);color:var(--gold)">SC</div><div class="si"><div class="sn">Sarah Chen — CFO</div><div class="so">Signer 2 · receives after you sign</div></div><span class="ss c-muted" id="cfo-A1">🔒 Locked</span></div>
+    <div class="brow" id="btns-A1">
+      <button class="btn btn-ok" onclick="doSign('A1',true)">✓ Sign &amp; forward to CFO</button>
+      <button class="btn btn-danger" onclick="doReject('A1')">✗ Reject</button>
+    </div>
+  </div>
+
+  <!-- A2: Treasurer only -->
+  <div class="apc nt" id="card-A2">
+    <div class="aph">
+      <div><div class="apt">Taipei Logistics Co — Vendor payment</div><div class="apm">Submitted by <strong>L. Kim (Treasury Analyst)</strong> · 13 Mar 08:15 UTC · Expires 14 Mar 08:15</div></div>
+      <span class="badge b-b" style="font-size:11px;padding:3px 10px">Treasurer sign only</span>
+    </div>
+    <div class="dg">
+      <div><div class="dl">Amount</div><div class="dv">$285,000<br><span style="font-weight:400;font-size:11px;color:var(--text-muted)">$100K–$500K tier</span></div></div>
+      <div><div class="dl">Wallet</div><div class="dv"><span class="badge b-b">Kinexys</span></div></div>
+      <div><div class="dl">Receiver</div><div class="dv">Taipei Logistics Co<br><span style="font-weight:400;font-size:11px;color:var(--text-muted)">SWIFT CTBCTWTP</span></div></div>
+      <div><div class="dl">Reference</div><div class="dv">PO-2025-0112</div></div>
+    </div>
+    <div class="sr"><div class="sa" style="background:#f1f5f9;color:var(--text-muted)">LK</div><div class="si"><div class="sn">L. Kim — Treasury Analyst</div><div class="so">Submitter</div></div><span class="ss c-green">✓ Submitted 08:15</span></div>
+    <div class="sr sy"><div class="sa" style="background:var(--blue-l);color:var(--blue)">ML</div><div class="si"><div class="sn">Marcus Lim — Treasurer (you)</div><div class="so">Signer 1 · your sign settles this payment directly</div></div><span class="ss c-gold" id="jp-A2">⏳ Awaiting you</span></div>
+    <div class="brow" id="btns-A2">
+      <button class="btn btn-ok" onclick="doSign('A2',false)">✓ Sign &amp; settle</button>
+      <button class="btn btn-danger" onclick="doReject('A2')">✗ Reject</button>
+    </div>
+  </div>
+
+  <div class="sl">Recently completed</div>
+  <div class="apc dn">
+    <div class="aph"><div><div class="apt">Taiwan Mfg Co — Trade payment</div><div class="apm">Submitted by L. Kim · Approved 10 Mar · $4.8M · HSBC Orion</div></div><span class="badge b-g">Settled</span></div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      <div class="sr sd" style="flex:1;margin-bottom:0"><div class="sa" style="background:var(--green-l);color:var(--green)">LK</div><div class="si"><div class="sn">L. Kim</div></div><span class="ss c-green">✓ Submitted</span></div>
+      <div class="sr sd" style="flex:1;margin-bottom:0"><div class="sa" style="background:var(--blue-l);color:var(--blue)">ML</div><div class="si"><div class="sn">Marcus Lim — Treasurer</div></div><span class="ss c-green">✓ Signed</span></div>
+      <div class="sr sd" style="flex:1;margin-bottom:0"><div class="sa" style="background:var(--green-l);color:var(--green)">SC</div><div class="si"><div class="sn">Sarah Chen — CFO</div></div><span class="ss c-green">✓ Released</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PAYMENTS ════ -->
+<div class="page" id="pg-pay">
+  <div class="metrics">
+    <div class="metric" style="--ml:var(--blue)"><div class="metric-lbl">MTD payments</div><div class="metric-val">142</div><div class="metric-sub">$48.3M total</div></div>
+    <div class="metric" style="--ml:var(--teal)"><div class="metric-lbl">Via tok. deposits</div><div class="metric-val c-teal">$44.7M</div><div class="metric-sub">92.6% of volume</div></div>
+    <div class="metric" style="--ml:var(--gold)"><div class="metric-lbl">Via stablecoin</div><div class="metric-val c-gold">$1.84M</div><div class="metric-sub">Employee pmts only</div></div>
+    <div class="metric" style="--ml:var(--green)"><div class="metric-lbl">Policy violations</div><div class="metric-val c-green">0</div><div class="metric-sub">All clean this month</div></div>
+  </div>
+  <div class="ib"><strong>Treasurer view (Marcus Lim):</strong> &lt;$100K auto-release · $100K–$500K you sign and settle · &gt;$500K forwards to CFO after your sign. Analyst submissions appear in sign-off queue.</div>
+
+  <!-- BATCH PAYMENTS SECTION -->
+  <div class="card">
+    <div class="card-hdr"><span class="ctitle">Batch &amp; ERP/HR import</span><button class="btn" onclick="toggleBatch()">+ New batch ↓</button></div>
+    <div id="batch-section" style="display:none">
+      <div class="sl" style="margin-top:0">Connect ERP / HR system</div>
+      <div class="g2" style="margin-bottom:12px">
+        <div class="erp-pill" onclick="showToast('SAP S/4HANA','Connecting to SAP — pending OAuth authorisation')"><div class="erp-ico" style="background:#e3f2fd">🔷</div><div class="erp-info"><div class="erp-name">SAP S/4HANA</div><div class="erp-sub">Pull AP payment runs &amp; payroll batches</div></div><span class="badge b-x">Connect</span></div>
+        <div class="erp-pill" onclick="showToast('Oracle Fusion','Connecting to Oracle Fusion — pending OAuth authorisation')"><div class="erp-ico" style="background:#fff3e0">🟠</div><div class="erp-info"><div class="erp-name">Oracle Fusion</div><div class="erp-sub">Financials &amp; HCM payroll integration</div></div><span class="badge b-x">Connect</span></div>
+        <div class="erp-pill" onclick="showToast('Workday HCM','Connecting to Workday — pending OAuth authorisation')"><div class="erp-ico" style="background:#f3e5f5">💼</div><div class="erp-info"><div class="erp-name">Workday HCM</div><div class="erp-sub">Employee payroll &amp; expense reimbursements</div></div><span class="badge b-x">Connect</span></div>
+        <div class="erp-pill" onclick="showToast('ADP Workforce','Connecting to ADP — pending OAuth authorisation')"><div class="erp-ico" style="background:#e8f5e9">🟢</div><div class="erp-info"><div class="erp-name">ADP Workforce Now</div><div class="erp-sub">Payroll disbursement batches</div></div><span class="badge b-x">Connect</span></div>
+      </div>
+      <div class="sl">Or upload a batch payment file</div>
+      <div class="upload-zone" id="upload-zone" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)" onclick="document.getElementById('batch-file').click()">
+        <input type="file" id="batch-file" accept=".csv,.xlsx,.xls,.xml" onchange="handleFileUpload(this.files[0])">
+        <div style="font-size:28px;margin-bottom:10px">📂</div>
+        <div style="font-weight:700;margin-bottom:4px">Drop batch file here or click to browse</div>
+        <div style="font-size:11px;color:var(--text-muted)">Accepted formats: CSV, XLSX, XML (ISO 20022 pain.001) &nbsp;·&nbsp; Max 500 rows</div>
+        <button class="btn" style="margin-top:12px" onclick="event.stopPropagation();downloadTemplate()">⬇ Download CSV template</button>
+      </div>
+      <div id="batch-preview" style="display:none;margin-top:12px">
+        <div class="sb"><strong>File loaded successfully</strong> &nbsp;<span id="batch-summary"></span></div>
+        <div style="overflow-x:auto"><table class="tbl" id="batch-tbl"><thead><tr><th>Row</th><th>Receiver</th><th class="num">Amount</th><th>CCY</th><th>Wallet</th><th>Reference</th><th>Approval tier</th></tr></thead><tbody id="batch-tbody"></tbody></table></div>
+        <div class="brow" style="margin-top:12px"><button class="btn btn-prim" onclick="submitBatch()">Submit all &amp; sign</button><button class="btn" onclick="clearBatch()">Clear</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENT FORM + LOG -->
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-hdr"><span class="ctitle">Initiate single payment</span></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="fg2">
+          <div class="fld"><label>Payment type</label><select id="p-type" onchange="updateFeeCalc()"><option value="vendor">Vendor payment</option><option value="interco">Intercompany</option><option value="trade">Trade settlement</option><option value="payroll">Payroll top-up</option><option value="expense">Employee expense</option><option value="contractor">Contractor</option><option value="bulk">High-value bulk</option></select></div>
+          <div class="fld"><label>Value date</label><input type="date" value="2025-03-13"></div>
+        </div>
+        <!-- RECEIVER — dropdown overlays via absolute positioning -->
+        <div class="fld" style="position:relative">
+          <label>Receiver account</label>
+          <div style="position:relative">
+            <input type="text" id="p-recv-in" placeholder="Search or click ↓ to see frequent receivers" oninput="searchRecv(this.value)" onfocus="showFrequent()" autocomplete="off" style="padding-right:36px">
+            <button onclick="showFrequent()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--text-muted)">▾</button>
+          </div>
+          <div id="p-recv-dd" style="display:none;position:absolute;top:100%;left:0;right:0;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rm);background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.12);z-index:50;margin-top:3px"></div>
+        </div>
+        <div id="p-recv-sel" style="display:none;padding:9px 11px;background:var(--bg-card2);border-radius:var(--rm);border:1px solid #86efac;font-size:12px"></div>
+        <div class="fg2">
+          <div class="fld"><label>Amount</label><input type="text" id="p-amt" class="num-input" placeholder="0.00" oninput="onAmtInput(this)"></div>
+          <div class="fld"><label>Currency</label><select id="p-ccy" onchange="updateFeeCalc()"><option value="USD">🇺🇸 USD</option><option value="GBP">🇬🇧 GBP</option><option value="SGD">🇸🇬 SGD</option><option value="EUR">🇪🇺 EUR</option></select></div>
+        </div>
+        <!-- DYNAMIC RAIL PICKER -->
+        <div class="fld">
+          <label>Payment rail &amp; network</label>
+          <div id="rail-picker-grid" class="rail-grid"></div>
+          <input type="hidden" id="p-wall" value="kinexys">
+        </div>
+        <!-- SUB-ACCOUNT SELECTOR (appears after rail is chosen) -->
+        <div id="rail-acct-selector" style="display:none">
+          <div class="fld">
+            <label id="rail-acct-label">Debit from account</label>
+            <div id="rail-acct-grid" style="display:flex;flex-direction:column;gap:5px;margin-top:4px"></div>
+          </div>
+        </div>
+        <div class="fld"><label>Reference</label><input type="text" id="p-ref" placeholder="Invoice / PO / reference number"></div>
+        <div class="fld"><label>Notes</label><textarea id="p-notes" placeholder="Purpose or internal notes…"></textarea></div>
+        <div class="fld">
+          <label>Supporting documentation</label>
+          <input type="file" id="p-attach" multiple accept=".pdf,.jpg,.png,.docx,.xlsx" onchange="handleAttach(this.files)" style="display:none">
+          <button class="btn" style="width:fit-content" onclick="document.getElementById('p-attach').click()">📎 Attach files</button>
+          <div class="attach-list" id="attach-list"></div>
+        </div>
+      </div>
+      <div class="fee-box" id="fee-box" style="display:none">
+        <div style="font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Estimated transaction cost — selected rail</div>
+        <div class="fee-row"><span class="c-muted">Principal amount</span><span class="fee-total" id="fee-principal">—</span></div>
+        <div class="fee-row"><span class="c-muted" id="fee-label">Network fee</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600" id="fee-amount">—</span></div>
+        <div class="fee-row" id="fee-fx-row"><span class="c-muted">FX conversion</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600" id="fee-fx">—</span></div>
+        <div class="fee-row" id="fee-platform-row"><span class="c-muted">StableConnect platform fee <span style="font-size:10px;background:var(--blue-l);color:var(--blue);padding:1px 6px;border-radius:7px;font-weight:700;margin-left:4px">10 bps</span></span><span style="font-family:'JetBrains Mono',monospace;font-weight:600" id="fee-platform">—</span></div>
+        <div class="fee-row" style="font-weight:700;border-top:1px solid var(--border);padding-top:7px;margin-top:2px"><span class="c-muted">Total to debit wallet</span><span class="fee-total" id="fee-total-val">—</span></div>
+        <div style="margin-top:7px;font-size:10.5px;color:var(--text-muted)" id="fee-settle-info"></div>
+      </div>
+      <div id="appr-tier-box" style="display:none"></div>
+      <div id="p-warn" style="display:none" class="wb" style="margin-top:10px"></div>
+      <div class="brow" style="margin-top:12px">
+        <button class="btn btn-ok" onclick="submitPay()">Submit &amp; sign</button>
+        <button class="btn" onclick="clearPay()">Clear</button>
+      </div>
+    </div>
+
+    <!-- TRANSACTION LOG -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-hdr"><span class="ctitle">Recent transactions</span>
+        <div class="seg">
+          <button class="seg-btn active" onclick="fPay('all',this)">All</button>
+          <button class="seg-btn" onclick="fPay('bank',this)">Bank tok.</button>
+          <button class="seg-btn" onclick="fPay('stable',this)">Stablecoin</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl" id="pay-tbl">
+          <thead><tr><th>Date</th><th>Submitter</th><th>Receiver</th><th class="num">Amount</th><th>Wallet</th><th>Status</th><th>Approval</th><th></th></tr></thead>
+          <tbody id="pay-tbody">
+            <tr data-cat="bank"><td>13 Mar</td><td class="c-muted">M. Torres</td><td>Supplier GmbH DE</td><td class="num">€3,200,000</td><td><span class="badge b-b">Kinexys</span></td><td><span class="badge b-a">Pending</span></td><td><span class="csq">Your sign</span></td><td><button class="btn" style="font-size:10px;padding:2px 7px" onclick="downloadInvoice('INV-2025-0341','Supplier GmbH DE','€3,200,000','13 Mar 2025','Kinexys')">⬇ Invoice</button></td></tr>
+            <tr data-cat="bank"><td>12 Mar</td><td class="c-muted">A. Patel</td><td>Acme SG Pte Ltd</td><td class="num">SGD 8,000,000</td><td><span class="badge b-t">HSBC Orion</span></td><td><span class="badge b-g">Settled</span></td><td><span class="badge b-g">Both signed</span></td><td><button class="btn" style="font-size:10px;padding:2px 7px" onclick="downloadInvoice('PMT-2025-0312','Acme SG Pte Ltd','SGD 8,000,000','12 Mar 2025','HSBC Orion')">⬇ Invoice</button></td></tr>
+            <tr data-cat="stable"><td>12 Mar</td><td class="c-muted">M. Torres</td><td>US payroll processor</td><td class="num">$48,000</td><td><span class="badge b-p">USDC</span></td><td><span class="badge b-g">Settled</span></td><td><span class="badge b-x">Auto-released</span></td><td><button class="btn" style="font-size:10px;padding:2px 7px" onclick="downloadInvoice('PAY-2025-0312','US Payroll','$48,000','12 Mar 2025','USDC')">⬇ Invoice</button></td></tr>
+            <tr data-cat="bank"><td>12 Mar</td><td class="c-muted">L. Kim</td><td>Taiwan Mfg Co</td><td class="num">$4,800,000</td><td><span class="badge b-t">HSBC Orion</span></td><td><span class="badge b-g">Settled</span></td><td><span class="badge b-g">Both signed</span></td><td><button class="btn" style="font-size:10px;padding:2px 7px" onclick="downloadInvoice('INV-2025-0310','Taiwan Mfg Co','$4,800,000','12 Mar 2025','HSBC Orion')">⬇ Invoice</button></td></tr>
+            <tr data-cat="stable"><td>11 Mar</td><td class="c-muted">A. Patel</td><td>Employee expense batch</td><td class="num">$23,400</td><td><span class="badge b-p">USDC</span></td><td><span class="badge b-g">Settled</span></td><td><span class="badge b-x">Auto-released</span></td><td><button class="btn" style="font-size:10px;padding:2px 7px" onclick="downloadInvoice('EXP-2025-0311','Employee Expenses','$23,400','11 Mar 2025','USDC')">⬇ Invoice</button></td></tr>
+            <tr data-cat="bank"><td>10 Mar</td><td class="c-muted">L. Kim</td><td>UK Law Firm LLP</td><td class="num">£280,000</td><td><span class="badge b-t">HSBC Orion</span></td><td><span class="badge b-g">Settled</span></td><td><span class="badge b-b">Treasurer signed</span></td><td><button class="btn" style="font-size:10px;padding:2px 7px" onclick="downloadInvoice('LGL-2025-0310','UK Law Firm LLP','£280,000','10 Mar 2025','HSBC Orion')">⬇ Invoice</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ STABLECOIN CONTROLS ════ -->
+<div class="page" id="pg-ctrl">
+  <div class="metrics">
+    <div class="metric" style="--ml:var(--teal)"><div class="metric-lbl">Stablecoin % of Total</div><div class="metric-val c-teal">6.4%</div><div class="metric-sub">Limit <span id="ctrl-pct-disp">8.0%</span></div></div>
+    <div class="metric" style="--ml:var(--blue)"><div class="metric-lbl">Absolute balance</div><div class="metric-val">$18.2M</div><div class="metric-sub">Limit <span id="ctrl-abs-disp">$25.0M</span></div></div>
+    <div class="metric" style="--ml:var(--green)"><div class="metric-lbl">Policy status</div><div class="metric-val c-green">Compliant</div><div class="metric-sub">All controls met</div></div>
+    <div class="metric" style="--ml:var(--purple)"><div class="metric-lbl">GENIUS Act status</div><div class="metric-val c-blue" style="font-size:15px;line-height:1.3">9/9 Checks ✓</div><div class="metric-sub">Fully compliant</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr"><span class="ctitle">Live utilization &amp; adjustable limits</span></div>
+      <div class="lm"><div class="lh"><span class="ln">% of Total</span><span class="lv c-green">6.4% used</span></div><div class="lt"><div class="lf" id="bar-pct" style="background:var(--teal)"></div><div class="lc" id="cap-pct" style="left:100%"></div></div><div class="lft"><span>0%</span><span style="color:var(--red);font-weight:700">Limit: <span id="cap-pct-lbl">8.0%</span></span></div></div>
+      <div class="sw"><div class="fld"><label>Adjust % of Total limit</label></div><div class="sw-row"><input type="range" min="2" max="20" step="0.5" value="8" id="sl-pct" oninput="updateSlider('pct',this.value)"><span class="sv" id="sv-pct">8.0%</span></div></div>
+      <div class="lm"><div class="lh"><span class="ln">Absolute balance</span><span class="lv c-green">$18.2M used</span></div><div class="lt"><div class="lf" id="bar-abs" style="background:var(--teal)"></div><div class="lc" id="cap-abs" style="left:100%"></div></div><div class="lft"><span>$0</span><span style="color:var(--red);font-weight:700">Limit: <span id="cap-abs-lbl">$25.0M</span></span></div></div>
+      <div class="sw"><div class="fld"><label>Adjust absolute limit ($M)</label></div><div class="sw-row"><input type="range" min="5" max="50" step="1" value="25" id="sl-abs" oninput="updateSlider('abs',this.value)"><span class="sv" id="sv-abs">$25M</span></div></div>
+      <div class="lm"><div class="lh"><span class="ln">Max per-transaction</span><span class="lv c-gold">$48K near limit</span></div><div class="lt"><div class="lf" id="bar-ptx" style="background:var(--gold);width:96%"></div><div class="lc" id="cap-ptx" style="left:100%"></div></div><div class="lft"><span>$0</span><span style="color:var(--red);font-weight:700">Limit: <span id="cap-ptx-lbl">$50K</span></span></div></div>
+      <div class="sw"><div class="fld"><label>Adjust per-tx limit ($K)</label></div><div class="sw-row"><input type="range" min="5" max="200" step="5" value="50" id="sl-ptx" oninput="updateSlider('ptx',this.value)"><span class="sv" id="sv-ptx">$50K</span></div></div>
+      <div class="lm" style="margin-bottom:6px"><div class="lh"><span class="ln">Monthly volume</span><span class="lv c-green">$1.84M used</span></div><div class="lt"><div class="lf" id="bar-mon" style="background:var(--teal);width:37%"></div><div class="lc" id="cap-mon" style="left:100%"></div></div><div class="lft"><span>$0</span><span style="color:var(--red);font-weight:700">Limit: <span id="cap-mon-lbl">$5.0M</span></span></div></div>
+      <div class="sw" style="margin-bottom:0"><div class="fld"><label>Adjust monthly limit ($M)</label></div><div class="sw-row"><input type="range" min="1" max="15" step="0.5" value="5" id="sl-mon" oninput="updateSlider('mon',this.value)"><span class="sv" id="sv-mon">$5.0M</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="ctitle">Permitted / prohibited uses</span></div>
+      <div class="dr"><div class="dr-ico" style="background:var(--green-l)">✓</div><div class="dr-main"><div class="dr-lbl">Employee expense claims</div><div class="dr-sub">Max $5K per claim</div></div><span class="badge b-g">Permitted</span></div>
+      <div class="dr"><div class="dr-ico" style="background:var(--green-l)">✓</div><div class="dr-main"><div class="dr-lbl">Payroll top-up batches</div><div class="dr-sub">Max $50K per batch</div></div><span class="badge b-g">Permitted</span></div>
+      <div class="dr"><div class="dr-ico" style="background:var(--green-l)">✓</div><div class="dr-main"><div class="dr-lbl">Petty cash disbursements</div><div class="dr-sub">Max $2K</div></div><span class="badge b-g">Permitted</span></div>
+      <div class="dr"><div class="dr-ico" style="background:var(--green-l)">✓</div><div class="dr-main"><div class="dr-lbl">Contractor micro-payments</div><div class="dr-sub">Max $10K</div></div><span class="badge b-g">Permitted</span></div>
+      <div class="dr"><div class="dr-ico" style="background:var(--red-l)">✗</div><div class="dr-main"><div class="dr-lbl">Vendor / supplier payments</div><div class="dr-sub">→ Route via Kinexys or Citi</div></div><span class="badge b-r">Prohibited</span></div>
+      <div class="dr"><div class="dr-ico" style="background:var(--red-l)">✗</div><div class="dr-main"><div class="dr-lbl">Intercompany transfers</div><div class="dr-sub">→ Route via Kinexys or HSBC Orion</div></div><span class="badge b-r">Prohibited</span></div>
+      <div class="dr" style="border-bottom:none"><div class="dr-ico" style="background:var(--red-l)">✗</div><div class="dr-main"><div class="dr-lbl">Any single tx &gt; per-tx limit</div><div class="dr-sub">Hard system block</div></div><span class="badge b-r">Hard block</span></div>
+      <div class="ar ar-e" style="margin-top:13px;margin-bottom:0"><div class="ar-dot" style="background:var(--red)"></div><div><strong>Circle counterparty cap breached</strong><small>$54.2M vs $52.5M ceiling. Shift $5M to Kinexys to remediate.</small></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PAYMENT WALLETS ════ -->
+<div class="page" id="pg-wall">
+  <div class="card">
+    <div class="card-hdr"><span class="ctitle">Payment routing &amp; approval matrix (updated thresholds)</span></div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>Payment type</th><th>Amount</th><th>Wallet</th><th>CCY</th><th>Treasurer sign</th><th>CFO sign</th><th class="num">Yield</th></tr></thead>
+        <tbody>
+          <tr><td>Employee expense / payroll</td><td>&lt; $100K</td><td><span class="badge b-p">USDC</span></td><td>USD</td><td><span class="badge b-x">Auto-release</span></td><td><span class="badge b-x">N/A</span></td><td class="num c-teal">4.85%</td></tr>
+          <tr><td>Domestic vendor</td><td>$100K – $500K</td><td><span class="badge b-b">Kinexys</span></td><td>USD</td><td><span class="badge b-g">Signer 1 (you)</span></td><td><span class="badge b-x">Not required</span></td><td class="num c-teal">4.52%</td></tr>
+          <tr><td>Domestic vendor</td><td>&gt; $500K</td><td><span class="badge b-b">Kinexys</span></td><td>USD</td><td><span class="badge b-g">Signer 1 (you)</span></td><td><span class="csq">Signer 2 — CFO</span></td><td class="num c-teal">4.52%</td></tr>
+          <tr><td>APAC/EMEA cross-border</td><td>$100K – $500K</td><td><span class="badge b-t">HSBC Orion</span></td><td>GBP/SGD/EUR</td><td><span class="badge b-g">Signer 1 (you)</span></td><td><span class="badge b-x">Not required</span></td><td class="num c-teal">4.38%</td></tr>
+          <tr><td>APAC/EMEA cross-border</td><td>&gt; $500K</td><td><span class="badge b-t">HSBC Orion</span></td><td>GBP/SGD/EUR</td><td><span class="badge b-g">Signer 1 (you)</span></td><td><span class="csq">Signer 2 — CFO</span></td><td class="num c-teal">4.38%</td></tr>
+          <tr><td>High-value bulk / M&amp;A</td><td>&gt; $500K</td><td><span class="badge b-p">Citi Token Svcs</span></td><td>USD</td><td><span class="badge b-g">Signer 1 (you)</span></td><td><span class="csq">Signer 2 — CFO</span></td><td class="num c-teal">4.48%</td></tr>
+          <tr><td>Intercompany (any amount)</td><td>Any</td><td><span class="badge b-b">Kinexys</span></td><td>Multi-CCY</td><td><span class="badge b-g">Signer 1 (you)</span></td><td><span class="csq">Signer 2 — CFO</span></td><td class="num c-teal">4.52%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RECEIVER ACCOUNTS ════ -->
+<div class="page" id="pg-recv">
+  <div class="metrics">
+    <div class="metric" style="--ml:var(--blue)"><div class="metric-lbl">Registered receivers</div><div class="metric-val" id="recv-count">522</div><div class="metric-sub">Verified &amp; approved</div></div>
+    <div class="metric" style="--ml:var(--teal)"><div class="metric-lbl">Suppliers</div><div class="metric-val">10</div><div class="metric-sub">EUR · SGD · GBP · USD</div></div>
+    <div class="metric" style="--ml:var(--green)"><div class="metric-lbl">Employees</div><div class="metric-val">500</div><div class="metric-sub">USDC / bank wallets</div></div>
+    <div class="metric" style="--ml:var(--purple)"><div class="metric-lbl">Subsidiaries</div><div class="metric-val">10</div><div class="metric-sub">Global entities</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="ctitle">Receiver account registry</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="seg" id="recv-seg">
+          <button class="seg-btn active" onclick="fRecv('all',this)">All</button>
+          <button class="seg-btn" onclick="fRecv('supplier',this)">Suppliers</button>
+          <button class="seg-btn" onclick="fRecv('employee',this)">Employees</button>
+          <button class="seg-btn" onclick="fRecv('subsidiary',this)">Subsidiaries</button>
+        </div>
+        <input type="text" id="recv-search" placeholder="Search receivers…" oninput="filterRecvTbl(this.value)" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--r);width:200px;outline:none">
+        <button class="btn btn-prim" onclick="toggleAddRecv()">+ Add receiver</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;max-height:500px;overflow-y:auto">
+      <table class="tbl" id="recv-tbl">
+        <thead><tr><th>Name</th><th>Type</th><th>Account</th><th>CCY</th><th>Wallet</th><th>Co-sign?</th><th>Status</th><th></th></tr></thead>
+        <tbody id="recv-tbody"></tbody>
+      </table>
+    </div>
+    <div style="padding:8px 0;font-size:11px;color:var(--text-muted)" id="recv-count-label">Showing all 522 receivers</div>
+  </div>
+  <div class="card" id="add-recv-form" style="display:none;border-color:var(--blue-mid);scroll-margin-top:80px">
+    <div class="card-hdr">
+      <div>
+        <span class="ctitle">Add new receiver account</span>
+        <div style="display:flex;gap:0;margin-top:8px;border-bottom:1px solid var(--border)">
+          <div id="nr-t1" style="padding:6px 13px;font-size:11px;font-weight:700;color:var(--blue);border-bottom:2px solid var(--blue);cursor:default">① Identity</div>
+          <div id="nr-t2" style="padding:6px 13px;font-size:11px;font-weight:500;color:var(--text-muted);border-bottom:2px solid transparent;cursor:pointer" onclick="nrStep(2)">② Account &amp; address</div>
+          <div id="nr-t3" style="padding:6px 13px;font-size:11px;font-weight:500;color:var(--text-muted);border-bottom:2px solid transparent;cursor:pointer" onclick="nrStep(3)">③ KYC &amp; verify</div>
+        </div>
+      </div>
+      <button class="btn" onclick="toggleAddRecv()">✕ Cancel</button>
+    </div>
+    <!-- STEP 1 -->
+    <div id="nr-s1">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="fg3">
+          <div class="fld"><label>Full legal name</label><input id="nr-name" type="text" placeholder="As it appears on account" oninput="nrSanctionCheck(this.value)"></div>
+          <div class="fld"><label>Type</label><select id="nr-type"><option value="supplier">Supplier</option><option value="employee">Employee</option><option value="subsidiary">Subsidiary</option></select></div>
+          <div class="fld"><label>Currency</label><select id="nr-ccy"><option>USD</option><option>GBP</option><option>SGD</option><option>EUR</option><option>JPY</option><option>AUD</option><option>CAD</option></select></div>
+        </div>
+        <div class="fg2">
+          <div class="fld"><label>Country of registration</label><select id="nr-country"><option>Singapore</option><option>United States</option><option>United Kingdom</option><option>Germany</option><option>Hong Kong</option><option>Japan</option><option>Australia</option><option>Canada</option><option>France</option><option>Other</option></select></div>
+          <div class="fld"><label>Tax ID / Registration No.</label><input id="nr-taxid" type="text" placeholder="UEN, EIN, CRN, etc."></div>
+        </div>
+        <div id="nr-sanction" style="display:none" class="ar ar-s"><div class="ar-dot" style="background:var(--green)"></div><div><strong id="nr-sanction-msg">Sanctions screening passed</strong><small>No matches on OFAC, UN, EU, MAS lists.</small></div></div>
+      </div>
+      <div class="brow" style="justify-content:flex-end;margin-top:14px"><button class="btn btn-prim" onclick="nrStep(2)">Next: Account details →</button></div>
+    </div>
+    <!-- STEP 2 -->
+    <div id="nr-s2" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="fld">
+          <label>Account / wallet address</label>
+          <div style="display:flex;gap:6px">
+            <input id="nr-acct" type="text" placeholder="IBAN, Sort/Acct, SWIFT, 0x wallet, Solana…" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:11px" oninput="nrDetectAddr(this.value)">
+            <button class="btn" style="white-space:nowrap;font-size:11px;padding:6px 10px" onclick="nrVerifyAddr()">Verify ↗</button>
+          </div>
+          <div id="nr-addr-detected" style="font-size:10.5px;color:var(--text-muted);margin-top:3px"></div>
+          <div id="nr-addr-status" style="display:none;margin-top:5px"></div>
+        </div>
+        <div class="fg2">
+          <div class="fld">
+            <label>Bank / network type</label>
+            <select id="nr-banktype">
+              <option value="">Select type…</option>
+              <optgroup label="Traditional banks"><option>JPMorgan Chase</option><option>HSBC</option><option>Citibank</option><option>Wells Fargo</option><option>Goldman Sachs</option><option>Deutsche Bank</option><option>BNP Paribas</option><option>Barclays</option><option>Standard Chartered</option><option>DBS Bank</option><option>OCBC</option><option>UOB</option><option>ANZ</option><option>Westpac</option><option>RBC</option><option>TD Bank</option><option>BBVA</option><option>Santander</option></optgroup>
+              <optgroup label="Digital / Tokenized"><option>Kinexys Digital Payments (JPM)</option><option>HSBC Orion</option><option>Citi Token Services</option><option>Base L2</option><option>Ethereum mainnet</option><option>Polygon</option><option>Solana</option></optgroup>
+              <optgroup label="Stablecoin wallets"><option>Circle (USDC)</option><option>PayPal (PYUSD)</option><option>Tether (USDT)</option></optgroup>
+              <optgroup label="Payment rails"><option>SWIFT</option><option>SEPA</option><option>FedWire</option><option>ACH</option><option>CHAPS</option><option>PayNow (SG)</option><option>Faster Payments (UK)</option></optgroup>
+            </select>
+          </div>
+          <div class="fld">
+            <label>Preferred payment wallet</label>
+            <select id="nr-prefwall"><option value="kinexys">Kinexys (JPM)</option><option value="orion">HSBC Orion</option><option value="citi">Citi Token Services</option><option value="usdc">USDC (employee only)</option></select>
+          </div>
+        </div>
+        <div class="fg2">
+          <div class="fld">
+            <label>SWIFT / BIC code</label>
+            <div style="display:flex;gap:6px">
+              <input id="nr-swift" type="text" placeholder="e.g. HSBCSGSG" style="font-family:'JetBrains Mono',monospace;font-size:11px;flex:1" oninput="nrValidateBic(this)">
+              <button class="btn" style="font-size:11px;padding:6px 10px;white-space:nowrap" onclick="nrLookupSwift()">Lookup ↗</button>
+            </div>
+            <div id="nr-swift-msg" style="font-size:10.5px;margin-top:3px;color:var(--text-muted)"></div>
+          </div>
+          <div class="fld"><label>Secondary address (optional)</label><input id="nr-acct2" type="text" placeholder="Backup IBAN or wallet"></div>
+        </div>
+      </div>
+      <div class="brow" style="justify-content:flex-end;margin-top:14px">
+        <button class="btn" onclick="nrStep(1)">← Back</button>
+        <button class="btn btn-prim" onclick="nrStep(3)">Next: KYC verification →</button>
+      </div>
+    </div>
+    <!-- STEP 3 -->
+    <div id="nr-s3" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div style="font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Automated checks</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:9px;font-size:12px"><div style="width:18px;height:18px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">✓</div><span style="flex:1">Sanctions screening (OFAC, UN, EU, MAS)</span><span class="badge b-g">Passed</span></div>
+            <div style="display:flex;align-items:center;gap:9px;font-size:12px"><div style="width:18px;height:18px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">✓</div><span style="flex:1">PEP (Politically Exposed Person) check</span><span class="badge b-g">Cleared</span></div>
+            <div id="nr-kyc-id-row" style="display:flex;align-items:center;gap:9px;font-size:12px"><div id="nr-kyc-id-ico" style="width:18px;height:18px;border-radius:50%;background:var(--gold-l);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">!</div><span style="flex:1">Identity / corporate registration document</span><span id="nr-kyc-id-st" style="font-size:10px;padding:2px 8px;border-radius:9px;background:var(--gold-l);color:var(--gold);font-weight:700">Required</span></div>
+            <div id="nr-kyc-addr-row" style="display:flex;align-items:center;gap:9px;font-size:12px"><div id="nr-kyc-addr-ico" style="width:18px;height:18px;border-radius:50%;background:var(--gold-l);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">!</div><span style="flex:1">Proof of address / bank statement</span><span id="nr-kyc-addr-st" style="font-size:10px;padding:2px 8px;border-radius:9px;background:var(--gold-l);color:var(--gold);font-weight:700">Required</span></div>
+          </div>
+        </div>
+        <div class="fld"><label>Upload identity document (ID, corporate cert, passport)</label><input type="file" id="nr-kyc-id-file" accept=".pdf,.jpg,.png" onchange="nrKycUpload('id',this)"><div id="nr-kyc-id-ok" style="font-size:10.5px;color:var(--green);margin-top:3px;display:none">✓ Document received — under review</div></div>
+        <div class="fld"><label>Upload proof of address / bank statement</label><input type="file" id="nr-kyc-addr-file" accept=".pdf,.jpg,.png" onchange="nrKycUpload('addr',this)"><div id="nr-kyc-addr-ok" style="font-size:10.5px;color:var(--green);margin-top:3px;display:none">✓ Document received — under review</div></div>
+        <div class="fg2">
+          <div class="fld"><label>Verified by (Treasurer)</label><input id="nr-verified" type="text" value="Marcus Lim — Treasurer"></div>
+          <div class="fld"><label>KYC status</label><select id="nr-kyc-status"><option value="pending">Pending review</option><option value="approved">Approved</option><option value="enhanced">Enhanced due diligence</option></select></div>
+        </div>
+      </div>
+      <div class="brow" style="margin-top:14px">
+        <button class="btn" onclick="nrStep(2)">← Back</button>
+        <button class="btn btn-ok" onclick="saveRecv()">✓ Save &amp; add receiver</button>
+        <button class="btn" onclick="toggleAddRecv()">Cancel</button>
+      </div>
+    </div>
+    <div id="nr-ok" style="display:none;margin-top:12px" class="ar ar-s"><div class="ar-dot" style="background:var(--green)"></div><div><strong id="nr-ok-title">Receiver added &amp; verified</strong><small id="nr-ok-sub">Available for payment initiation immediately.</small></div></div>
+  </div>
+</div>
+
+<!-- ════ RECONCILIATION ════ -->
+<div class="page" id="pg-recon">
+  <div class="metrics">
+    <div class="metric" style="--ml:var(--green)"><div class="metric-lbl">Recon status</div><div class="metric-val c-green">Clean</div><div class="metric-sub">8 accounts matched</div></div>
+    <div class="metric" style="--ml:var(--blue)"><div class="metric-lbl">Last sync</div><div class="metric-val">Today</div><div class="metric-sub">09:12 UTC automated</div></div>
+    <div class="metric" style="--ml:var(--teal)"><div class="metric-lbl">Ledger variance</div><div class="metric-val c-teal">$0</div><div class="metric-sub">Perfect match</div></div>
+    <div class="metric" style="--ml:var(--gold)"><div class="metric-lbl">ERP system</div><div class="metric-val">SAP</div><div class="metric-sub">GL 1320–1328 posted</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="ctitle">Full account reconciliation — 13 Mar 2025</span><button class="btn btn-prim" onclick="openErp()">Export to ERP ↗</button></div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>Account</th><th>Layer</th><th>CCY</th><th>Local balance</th><th class="num">USD equiv.</th><th>GL code</th><th class="num">Variance</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Kinexys — Cash reserve</td><td><span class="badge b-b">Reserve</span></td><td>USD</td><td>$38,100,000</td><td class="num">$38,100,000</td><td>GL-1320</td><td class="num c-green">$0</td><td><span class="badge b-g">Matched</span></td></tr>
+          <tr><td>HSBC Orion — GBP reserve</td><td><span class="badge b-t">Reserve</span></td><td>GBP</td><td>£6,200,000</td><td class="num">$7,806,000</td><td>GL-1321</td><td class="num c-green">$0</td><td><span class="badge b-g">Matched</span></td></tr>
+          <tr><td>HSBC Orion — SGD reserve</td><td><span class="badge b-t">Reserve</span></td><td>SGD</td><td>SGD 8,400,000</td><td class="num">$6,260,000</td><td>GL-1322</td><td class="num c-green">$0</td><td><span class="badge b-g">Matched</span></td></tr>
+          <tr><td>Kinexys — Payment wallet</td><td><span class="badge b-b">Payment</span></td><td>USD</td><td>$18,500,000</td><td class="num">$18,500,000</td><td>GL-1323</td><td class="num c-green">$0</td><td><span class="badge b-g">Matched</span></td></tr>
+          <tr><td>HSBC Orion — EUR pmt wallet</td><td><span class="badge b-t">Payment</span></td><td>EUR</td><td>€5,100,000</td><td class="num">$5,537,000</td><td>GL-1324</td><td class="num c-green">$0</td><td><span class="badge b-g">Matched</span></td></tr>
+          <tr><td>Citi Token Services</td><td><span class="badge b-p">Payment</span></td><td>USD</td><td>$9,600,000</td><td class="num">$9,600,000</td><td>GL-1325</td><td class="num c-green">$0</td><td><span class="badge b-g">Matched</span></td></tr>
+          <tr><td>USDC — Employee wallet</td><td><span class="badge b-p">Restricted</span></td><td>USD</td><td>$12,400,000</td><td class="num">$12,400,000</td><td>GL-1326</td><td class="num c-green">$0</td><td><span class="badge b-g">Matched</span></td></tr>
+          <tr><td>PYUSD — Petty cash</td><td><span class="badge b-p">Restricted</span></td><td>USD</td><td>$5,800,000</td><td class="num">$5,800,000</td><td>GL-1327</td><td class="num c-green">$0</td><td><span class="badge b-g">Matched</span></td></tr>
+        </tbody>
+        <tfoot><tr class="foot"><td><strong>Total on-chain</strong></td><td colspan="3"></td><td class="num">$104,003,000</td><td>GL-1328</td><td class="num c-green">$0</td><td><span class="badge b-g">Matched</span></td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════ GENIUS COMPLIANCE ════ -->
+<div class="page" id="pg-genius">
+  <div class="metrics">
+    <div class="metric" style="--ml:var(--purple)"><div class="metric-lbl">Overall compliance</div><div class="metric-val" style="color:var(--purple)">9 / 9</div><div class="metric-sub c-green">All checks passed</div></div>
+    <div class="metric" style="--ml:var(--green)"><div class="metric-lbl">GENIUS Act status</div><div class="metric-val c-green">Compliant</div><div class="metric-sub">As of 13 Mar 2025</div></div>
+    <div class="metric" style="--ml:var(--gold)"><div class="metric-lbl">Stablecoin holdings</div><div class="metric-val c-gold">$18.2M</div><div class="metric-sub">USDC + PYUSD only</div></div>
+    <div class="metric" style="--ml:var(--blue)"><div class="metric-lbl">Next review</div><div class="metric-val">Apr 2025</div><div class="metric-sub">Monthly reserve report due</div></div>
+  </div>
+  <div class="pb"><strong>GENIUS Act (Guiding and Establishing National Innovation for U.S. Stablecoins):</strong> Federal framework for payment stablecoin issuers requiring 1:1 reserve backing, regulated issuer status, prohibition on interest (direct), monthly reserve disclosure, and redemption rights. StableConnect uses only GENIUS-approved stablecoin instruments.</div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr"><span class="ctitle">GENIUS Act compliance checklist</span><span class="genius-badge">🛡 9/9 passed</span></div>
+      <div class="gc-row"><div class="gc-status gc-pass">✓</div><div style="flex:1"><div style="font-weight:600;font-size:12px">Approved issuer structure</div><div style="font-size:11px;color:var(--text-muted)">Circle (USDC) and PayPal (PYUSD) are GENIUS-designated payment stablecoin issuers under federal supervision.</div></div><span class="badge b-g">Pass</span></div>
+      <div class="gc-row"><div class="gc-status gc-pass">✓</div><div style="flex:1"><div style="font-weight:600;font-size:12px">1:1 reserve backing</div><div style="font-size:11px;color:var(--text-muted)">Both USDC and PYUSD maintain ≥100% backing in cash, T-bills, or approved equivalents. Most recent attestation: Mar 2025.</div></div><span class="badge b-g">Pass</span></div>
+      <div class="gc-row"><div class="gc-status gc-pass">✓</div><div style="flex:1"><div style="font-weight:600;font-size:12px">No direct interest payment</div><div style="font-size:11px;color:var(--text-muted)">PYUSD held at 0% yield. USDC yield via IPS §4.7 compliant wrapper — not direct stablecoin interest.</div></div><span class="badge b-g">Pass</span></div>
+      <div class="gc-row"><div class="gc-status gc-pass">✓</div><div style="flex:1"><div style="font-weight:600;font-size:12px">Redemption rights</div><div style="font-size:11px;color:var(--text-muted)">Both issuers contractually guarantee at-par USD redemption within 1 business day.</div></div><span class="badge b-g">Pass</span></div>
+      <div class="gc-row"><div class="gc-status gc-pass">✓</div><div style="flex:1"><div style="font-weight:600;font-size:12px">Monthly reserve disclosure</div><div style="font-size:11px;color:var(--text-muted)">Circle publishes monthly reserve reports (Grant Thornton attestation). PayPal reports quarterly — compliant under GENIUS transition rules.</div></div><span class="badge b-g">Pass</span></div>
+      <div class="gc-row"><div class="gc-status gc-pass">✓</div><div style="flex:1"><div style="font-weight:600;font-size:12px">Permissible reserve assets only</div><div style="font-size:11px;color:var(--text-muted)">USDC reserves: US T-bills &lt;93 days, overnight repo, Fed reverse repo, bank deposits. No corporate bonds, equities, or crypto.</div></div><span class="badge b-g">Pass</span></div>
+      <div class="gc-row"><div class="gc-status gc-pass">✓</div><div style="flex:1"><div style="font-weight:600;font-size:12px">Segregation of customer assets</div><div style="font-size:11px;color:var(--text-muted)">StableConnect USDC wallet (GL-1326) is ring-fenced for employee payments only, not commingled with operating treasury.</div></div><span class="badge b-g">Pass</span></div>
+      <div class="gc-row"><div class="gc-status gc-pass">✓</div><div style="flex:1"><div style="font-weight:600;font-size:12px">IPS policy restriction beyond GENIUS</div><div style="font-size:11px;color:var(--text-muted)">IPS §4.7 restricts stablecoins to employee-facing low-value payments only — more conservative than GENIUS Act minimum requirements.</div></div><span class="badge b-g">Pass</span></div>
+      <div class="gc-row" style="border-bottom:none"><div class="gc-status gc-pass">✓</div><div style="flex:1"><div style="font-weight:600;font-size:12px">Stablecoin concentration limit</div><div style="font-size:11px;color:var(--text-muted)">6.4% of Total Cash Under Management vs IPS 8% cap. No single issuer exceeds 30% of stablecoin holdings.</div></div><span class="badge b-g">Pass</span></div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-hdr"><span class="ctitle">Holdings compliance matrix</span></div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Instrument</th><th>Issuer type</th><th>GENIUS scope</th><th>Yield allowed</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><strong>USDC</strong></td><td>Federal payment stablecoin</td><td><span class="badge b-a">In scope</span></td><td><span class="badge b-a">Via wrapper only</span></td><td><span class="genius-badge">✓ Compliant</span></td></tr>
+              <tr><td><strong>PYUSD</strong></td><td>Federal payment stablecoin</td><td><span class="badge b-a">In scope</span></td><td><span class="badge b-x">0% (none)</span></td><td><span class="genius-badge">✓ Compliant</span></td></tr>
+              <tr><td><strong>Kinexys</strong></td><td>OCC-chartered bank token</td><td><span class="badge b-g">Out of scope</span></td><td><span class="badge b-g">Permitted</span></td><td><span class="badge b-g">N/A (bank deposit)</span></td></tr>
+              <tr><td><strong>HSBC Orion</strong></td><td>FCA/MAS-regulated deposit</td><td><span class="badge b-g">Out of scope</span></td><td><span class="badge b-g">Permitted</span></td><td><span class="badge b-g">N/A (bank deposit)</span></td></tr>
+              <tr><td><strong>Citi Token</strong></td><td>OCC-chartered bank token</td><td><span class="badge b-g">Out of scope</span></td><td><span class="badge b-g">Permitted</span></td><td><span class="badge b-g">N/A (bank deposit)</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="ctitle">Upcoming obligations</span></div>
+        <div class="dr"><div class="dr-ico" style="background:var(--gold-l)">📋</div><div class="dr-main"><div class="dr-lbl">Monthly reserve report verification</div><div class="dr-sub">Circle USDC — due 1 Apr 2025</div></div><span class="badge b-a">Due soon</span></div>
+        <div class="dr"><div class="dr-ico" style="background:var(--blue-l)">🔍</div><div class="dr-main"><div class="dr-lbl">IPS §4.7 annual policy review</div><div class="dr-sub">Next review: 30 Jun 2025</div></div><span class="badge b-b">Scheduled</span></div>
+        <div class="dr"><div class="dr-ico" style="background:var(--green-l)">✅</div><div class="dr-main"><div class="dr-lbl">Circle reserve attestation received</div><div class="dr-sub">Feb 2025 — Grant Thornton</div></div><span class="badge b-g">Complete</span></div>
+        <div class="dr" style="border-bottom:none"><div class="dr-ico" style="background:var(--green-l)">✅</div><div class="dr-main"><div class="dr-lbl">GENIUS Act transition filing</div><div class="dr-sub">Filed 15 Jan 2025 with FinCEN</div></div><span class="badge b-g">Complete</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ═══ FX ═══════════════════════════════════════
+var FX={USD:1,GBP:.792,SGD:1.342,EUR:.921};
+var activeCcy='USD';
+var sym={USD:'$',GBP:'£',SGD:'SGD ',EUR:'€'};
+var TOTAL_USD=284700000;
+
+function setCcy(c,btn){
+  activeCcy=c;
+  document.querySelectorAll('#ccy-seg .seg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ccy-lbl').textContent=c;
+  var pc=document.getElementById('pos-ccy');if(pc)pc.textContent=c;
+  var ph=document.getElementById('pos-base-hdr');if(ph)ph.textContent=c+' equiv.';
+  // Update home page CUM
+  var v=TOTAL_USD*FX[c],s=sym[c];
+  var formatted=s+(v/1e6).toFixed(1)+'M';
+  document.getElementById('ov-cum').textContent=formatted;
+  document.getElementById('ov-cum-label').textContent=formatted;
+  document.getElementById('donut-center').textContent=formatted;
+  // Update legend values
+  var tokUSD=85800000,tradUSD=140200000,scUSD=18200000,fiatUSD=40500000,ytdUSD=881000;
+  document.getElementById('leg-tok').textContent=s+(tokUSD*FX[c]/1e6).toFixed(1)+'M';
+  document.getElementById('leg-trad').textContent=s+(tradUSD*FX[c]/1e6).toFixed(1)+'M';
+  document.getElementById('leg-sc').textContent=s+(scUSD*FX[c]/1e6).toFixed(1)+'M';
+  document.getElementById('leg-fiat').textContent=s+(fiatUSD*FX[c]/1e6).toFixed(1)+'M';
+  document.getElementById('leg-ytd').textContent=s+(ytdUSD*FX[c]/1e3).toFixed(0)+'K';
+  buildPos();
+}
+
+// ═══ CHARTS ═══════════════════════════════════
+var donutCtx=document.getElementById('donut-chart').getContext('2d');
+new Chart(donutCtx,{type:'doughnut',data:{labels:['Tokenized deposits','Traditional','Stablecoins','Fiat fallback'],datasets:[{data:[85.8,140.2,18.2,40.5],backgroundColor:['#2563eb','#0891b2','#d97706','#94a3b8'],borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:true,cutout:'72%',plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.9)',titleColor:'#f1f5f9',bodyColor:'#94a3b8',callbacks:{label:ctx=>' $'+ctx.parsed.toFixed(1)+'M ('+((ctx.parsed/284.7)*100).toFixed(1)+'%)'}}},animation:{duration:800}}});
+
+var yCtx=document.getElementById('yield-chart').getContext('2d');
+new Chart(yCtx,{type:'bar',data:{labels:['USDC\n(wrapped)','Wells\n60d CD','Kinexys','Goldman\nHYSA','Citi\nToken','Vanguard\nVMFXX','HSBC\nGBP','HSBC\nSGD','HSBC\nEUR','JPM\nOp.','PYUSD'],datasets:[{label:'Yield %',data:[4.85,4.70,4.52,4.50,4.48,4.44,4.38,4.20,4.15,0.40,0.00],backgroundColor:ctx=>{var v=ctx.raw;return v>=4.5?'rgba(8,145,178,.7)':v>=3?'rgba(37,99,235,.7)':v>=0.1?'rgba(217,119,6,.7)':'rgba(148,163,184,.5)'},borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.9)',titleColor:'#f1f5f9',bodyColor:'#94a3b8',callbacks:{label:ctx=>' '+ctx.raw.toFixed(2)+'%'}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#94a3b8',maxRotation:0}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11},color:'#64748b',callback:v=>v.toFixed(1)+'%'},min:0,max:5.5}},animation:{duration:800}}});
+
+// ═══ COUNTERPARTY EXPOSURE ════════════════════
+var cpData=[
+  {cp:'JPMorgan (Kinexys+Operating)',instruments:'Kinexys reserve, payment wallet, JPM Operating',exp:88800000,limit:100000000,rating:'AA-',color:'#2563eb'},
+  {cp:'HSBC (Orion reserves+wallets)',instruments:'GBP/SGD/EUR reserves, EUR pmt wallet',exp:28200000,limit:60000000,rating:'A+',color:'#0891b2'},
+  {cp:'Vanguard (VMFXX)',instruments:'Money market fund',exp:74000000,limit:100000000,rating:'AAA',color:'#16a34a'},
+  {cp:'Goldman Sachs (HYSA)',instruments:'High-yield savings',exp:41200000,limit:60000000,rating:'A+',color:'#16a34a'},
+  {cp:'Circle (USDC)',instruments:'Employee wallet, GENIUS wrapper',exp:54200000,limit:52500000,rating:'N/A',color:'#dc2626',breach:true},
+  {cp:'PayPal (PYUSD)',instruments:'Petty cash wallet',exp:5800000,limit:20000000,rating:'N/A',color:'#16a34a'},
+  {cp:'Wells Fargo (60d CD)',instruments:'Certificate of deposit',exp:25000000,limit:40000000,rating:'A',color:'#16a34a'},
+  {cp:'Citibank (Token Services)',instruments:'High-value payment wallet',exp:9600000,limit:30000000,rating:'A+',color:'#16a34a'},
+];
+function buildCpTable(){
+  var s=sym[activeCcy];
+  document.getElementById('cp-body').innerHTML=cpData.map(r=>{
+    var pct=(r.exp/TOTAL_USD*100).toFixed(1);
+    var util=Math.min(105,r.exp/r.limit*100);
+    var col=r.breach?'#dc2626':util>80?'#d97706':'#0891b2';
+    var expDisplay=s+(r.exp*FX[activeCcy]/1e6).toFixed(1)+'M';
+    return '<tr>'
+      +'<td><strong>'+(r.breach?'⚠ ':'')+r.cp+'</strong></td>'
+      +'<td style="font-size:11px;color:var(--text-muted)">'+r.instruments+'</td>'
+      +'<td class="num">'+expDisplay+'</td>'
+      +'<td class="num">'+pct+'%'
+        +'<div style="height:4px;width:60px;background:#e2e8f0;border-radius:2px;display:inline-block;vertical-align:middle;margin-left:6px;overflow:hidden"><div style="height:4px;width:'+Math.min(100,util)+'%;background:'+col+';border-radius:2px"></div></div>'
+        +'</td>'
+      +'<td>'+(r.breach?'<span class="badge b-r">BREACHED</span>':s+(r.limit*FX[activeCcy]/1e6).toFixed(0)+'M')+'</td>'
+      +'<td style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:'+col+'">'+(r.breach?'103%':util.toFixed(0)+'%')+'</td>'
+      +'<td><span class="badge '+(r.rating==='N/A'?'b-x':r.rating.startsWith('AA')?'b-g':r.rating.startsWith('A')?'b-b':'b-a')+'">'+r.rating+'</span></td>'
+      +'<td>'+(r.breach?'<span class="badge b-r">Breach</span>':'<span class="badge b-g">OK</span>')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+buildCpTable();
+
+// ═══ POSITION REPORT ═════════════════════════
+var posRows=[
+  {n:'Kinexys — Cash reserve',l:'reserve',lb:'b-b',ll:'Reserve',p:'JPMorgan',c:'USD',loc:38100000,usd:38100000,y:'4.52%',ytd:360000,r:'OCC',genius:'N/A',g:'GL-1320'},
+  {n:'HSBC Orion — GBP reserve',l:'reserve',lb:'b-t',ll:'Reserve',p:'HSBC',c:'GBP',loc:6200000,usd:7826000,y:'4.38%',ytd:72000,r:'FCA/Fed',genius:'N/A',g:'GL-1321'},
+  {n:'HSBC Orion — SGD reserve',l:'reserve',lb:'b-t',ll:'Reserve',p:'HSBC',c:'SGD',loc:8400000,usd:6260000,y:'4.20%',ytd:55000,r:'MAS',genius:'N/A',g:'GL-1322'},
+  {n:'Kinexys — Payment wallet',l:'payment',lb:'b-b',ll:'Payment',p:'JPMorgan',c:'USD',loc:18500000,usd:18500000,y:'4.52%',ytd:175000,r:'OCC',genius:'N/A',g:'GL-1323'},
+  {n:'HSBC Orion — EUR pmt wallet',l:'payment',lb:'b-t',ll:'Payment',p:'HSBC',c:'EUR',loc:5100000,usd:5537000,y:'4.15%',ytd:48000,r:'ECB',genius:'N/A',g:'GL-1324'},
+  {n:'Citi Token Services',l:'payment',lb:'b-p',ll:'Payment',p:'Citibank',c:'USD',loc:9600000,usd:9600000,y:'4.48%',ytd:90000,r:'OCC',genius:'N/A',g:'GL-1325'},
+  {n:'USDC — Employee wallet',l:'payment',lb:'b-p',ll:'Restricted',p:'Circle',c:'USD',loc:12400000,usd:12400000,y:'4.85%*',ytd:125000,r:'GENIUS',genius:'✓',g:'GL-1326'},
+  {n:'PYUSD — Petty cash',l:'payment',lb:'b-p',ll:'Restricted',p:'PayPal',c:'USD',loc:5800000,usd:5800000,y:'0.00%',ytd:0,r:'GENIUS',genius:'✓',g:'GL-1327'},
+  {n:'Goldman HYSA',l:'trad',lb:'b-x',ll:'Traditional',p:'Goldman',c:'USD',loc:41200000,usd:41200000,y:'4.50%',ytd:390000,r:'FDIC',genius:'N/A',g:'GL-1400'},
+  {n:'Vanguard VMFXX',l:'trad',lb:'b-x',ll:'Traditional',p:'Vanguard',c:'USD',loc:74000000,usd:74000000,y:'4.44%',ytd:692000,r:'SEC/MMF',genius:'N/A',g:'GL-1401'},
+  {n:'JPM Operating (fiat)',l:'trad',lb:'b-x',ll:'Fallback',p:'JPMorgan',c:'USD',loc:32100000,usd:32100000,y:'0.40%',ytd:27000,r:'FDIC',genius:'N/A',g:'GL-1402'},
+  {n:'Wells 60d CD',l:'trad',lb:'b-x',ll:'Traditional',p:'Wells Fargo',c:'USD',loc:25000000,usd:25000000,y:'4.70%',ytd:245000,r:'FDIC',genius:'N/A',g:'GL-1403'},
+];
+var activeLayer='all';
+function filterLayer(f,btn){activeLayer=f;document.querySelectorAll('#layer-seg .seg-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');buildPos();}
+function fmtNum(n){return Math.abs(n).toLocaleString('en-US');}
+function buildPos(){
+  var rows=posRows.filter(r=>activeLayer==='all'||r.l===activeLayer);
+  var s=sym[activeCcy];
+  document.getElementById('pos-body').innerHTML=rows.map(r=>{
+    var bv=r.usd*FX[activeCcy],by=r.ytd*FX[activeCcy];
+    return '<tr><td><strong>'+r.n+'</strong></td><td><span class="badge '+r.lb+'">'+r.ll+'</span></td><td>'+r.p+'</td><td>'+r.c+'</td>'
+      +'<td class="num">'+sym[r.c]+fmtNum(r.loc)+'</td>'
+      +'<td class="num">'+s+fmtNum(Math.round(bv))+'</td>'
+      +'<td class="num c-teal">'+r.y+'</td>'
+      +'<td class="num c-green">'+s+fmtNum(Math.round(by))+'</td>'
+      +'<td><span class="badge b-g">'+r.r+'</span></td>'
+      +'<td>'+(r.genius==='✓'?'<span class="genius-badge">✓</span>':'<span class="badge b-x">—</span>')+'</td>'
+      +'<td style="font-size:11px;color:var(--text-muted)">'+r.g+'</td></tr>';
+  }).join('');
+  var tU=rows.reduce((a,r)=>a+r.usd,0),tY=rows.reduce((a,r)=>a+r.ytd,0);
+  document.getElementById('pos-foot').innerHTML='<tr class="foot"><td colspan="5"><strong>Total ('+rows.length+' accounts)</strong></td><td class="num">'+s+fmtNum(Math.round(tU*FX[activeCcy]))+'</td><td></td><td class="num c-green">'+s+fmtNum(Math.round(tY*FX[activeCcy]))+'</td><td colspan="3"></td></tr>';
+}
+buildPos();
+
+// ═══ APPROVALS ═══════════════════════════════
+var pendCnt=2;
+function doSign(id,needsCFO){
+  var card=document.getElementById('card-'+id);
+  var jp=document.getElementById('jp-'+id);jp.textContent='✓ Signed by you';jp.style.color='var(--green)';
+  card.querySelector('.sr.sy').className='sr sd';
+  if(needsCFO){
+    var cfoRow=card.querySelector('.sr.sp');
+    if(cfoRow){cfoRow.className='sr sd';var ss=cfoRow.querySelector('.ss');if(ss)ss.textContent='⏳ Notified';}
+    card.className='apc fc';
+    document.getElementById('btns-'+id).innerHTML='<div class="ar ar-s" style="margin:0;flex:1"><div class="ar-dot" style="background:var(--green)"></div><div><strong>Forwarded to CFO — Sarah Chen</strong><small>Sarah has been notified. Payment releases once she signs.</small></div></div>';
+  } else {
+    card.className='apc dn';
+    document.getElementById('btns-'+id).innerHTML='<div class="ar ar-s" style="margin:0;flex:1"><div class="ar-dot" style="background:var(--green)"></div><div><strong>Payment settled — Kinexys rails</strong><small>$285,000 sent to Taipei Logistics Co via Kinexys Digital Payments. Settlement expected T+0. Payment ID: KNX-2025-0313-0042.</small></div></div>';
+  }
+  pendCnt=Math.max(0,pendCnt-1);
+  var b=document.getElementById('appr-badge');b.textContent=pendCnt;if(!pendCnt)b.style.display='none';
+  document.getElementById('pend-cnt').textContent=pendCnt;
+  document.getElementById('ov-pend').textContent=pendCnt;
+  document.getElementById('pend-fx').textContent=pendCnt+' payment'+(pendCnt!==1?'s':'');
+}
+function doReject(id){
+  // Show inline rejection form - don't finalise yet
+  document.getElementById('card-'+id).className='apc rj';
+  document.getElementById('btns-'+id).innerHTML=''
+    +'<div class="rej-form">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:10px">Select reason for rejection</div>'
+      +'<div class="fld" style="margin-bottom:8px"><label>Reason</label>'
+        +'<select id="rej-r-'+id+'">'
+          +'<option value="">— Select a reason —</option>'
+          +'<option value="Insufficient funds">Insufficient funds in source account</option>'
+          +'<option value="Incorrect amount">Incorrect payment amount</option>'
+          +'<option value="Incorrect receiver">Incorrect receiver / account details</option>'
+          +'<option value="Missing documentation">Missing supporting documentation</option>'
+          +'<option value="Policy breach">Payment policy breach</option>'
+          +'<option value="Suspected duplicate">Suspected duplicate payment</option>'
+          +'<option value="Sanctions concern">Sanctions / compliance concern</option>'
+          +'<option value="Business decision">Business decision — not required</option>'
+          +'<option value="Other">Other (specify in notes)</option>'
+        +'</select>'
+      +'</div>'
+      +'<div class="fld" style="margin-bottom:10px"><label>Notes to submitter (required)</label>'
+        +'<textarea id="rej-n-'+id+'" placeholder="Explain what needs to be corrected or provide context for the rejection…"></textarea>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+        +'<button class="btn btn-danger" data-rid="'+id+'" onclick="confirmReject(this.dataset.rid)">✗ Confirm rejection &amp; notify submitter</button>'
+        +'<button class="btn" data-rid="'+id+'" onclick="cancelReject(this.dataset.rid)">Cancel</button>'
+      +'</div>'
+    +'</div>';
+}
+function confirmReject(id){
+  var reason=document.getElementById('rej-r-'+id).value;
+  var notes=document.getElementById('rej-n-'+id).value.trim();
+  if(!reason){alert('Please select a reason.');return;}
+  if(!notes){alert('Please add notes for the submitter.');return;}
+  document.getElementById('btns-'+id).innerHTML=''
+    +'<div class="ar ar-e" style="margin:0;flex:1">'
+      +'<div class="ar-dot" style="background:var(--red)"></div>'
+      +'<div>'
+        +'<strong>Rejected — '+reason+'</strong>'
+        +'<small>Submitter notified. Payment cancelled and logged in audit trail.</small>'
+        +'<div style="margin-top:6px;padding:8px 10px;background:#fff;border-radius:var(--r);border:1px solid #fca5a5;font-size:11px;color:var(--text-muted);font-style:italic">'
+          +'&ldquo;'+notes+'&rdquo;'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  pendCnt=Math.max(0,pendCnt-1);
+  var b=document.getElementById('appr-badge');b.textContent=pendCnt;if(!pendCnt)b.style.display='none';
+  document.getElementById('pend-cnt').textContent=pendCnt;
+  document.getElementById('ov-pend').textContent=pendCnt;
+  document.getElementById('pend-fx').textContent=pendCnt+' payment'+(pendCnt!==1?'s':'');
+}
+function cancelReject(id){
+  var needsCFO=(id==='A1');
+  document.getElementById('card-'+id).className='apc '+(needsCFO?'ny':'nt');
+  document.getElementById('btns-'+id).innerHTML=''
+    +'<button class="btn btn-ok" data-sid="'+id+'" data-cfo="'+(needsCFO?'1':'0')+'" onclick="doSign(this.dataset.sid,this.dataset.cfo===\'1\')">'
+      +(needsCFO?'✓ Sign &amp; forward to CFO':'✓ Sign &amp; settle')
+    +'</button>'
+    +'<button class="btn btn-danger" data-rid="'+id+'" onclick="doReject(this.dataset.rid)">✗ Reject</button>';
+}
+
+// ═══ SLIDERS ═════════════════════════════════
+function updateSlider(type,val){
+  var v=parseFloat(val);
+  switch(type){
+    case'pct':
+      document.getElementById('sv-pct').textContent=v.toFixed(1)+'%';
+      document.getElementById('cap-pct-lbl').textContent=v.toFixed(1)+'%';
+      document.getElementById('ctrl-pct-disp').textContent=v.toFixed(1)+'%';
+      document.getElementById('ov-pct-limit').textContent=v.toFixed(1)+'%';
+      document.getElementById('ov-limit-txt').textContent=v.toFixed(1)+'%';
+      var p=6.4/v*100;
+      document.getElementById('bar-pct').style.cssText='background:'+( p>90?'var(--red)':p>75?'var(--gold)':'var(--teal)')+';width:'+Math.min(100,p)+'%';
+      break;
+    case'abs':
+      document.getElementById('sv-abs').textContent='$'+v+'M';
+      document.getElementById('cap-abs-lbl').textContent='$'+v+'.0M';
+      document.getElementById('ctrl-abs-disp').textContent='$'+v+'.0M';
+      var pa=18.2/v*100;
+      document.getElementById('bar-abs').style.cssText='background:'+( pa>90?'var(--red)':pa>75?'var(--gold)':'var(--teal)')+';width:'+Math.min(100,pa)+'%';
+      break;
+    case'ptx':
+      document.getElementById('sv-ptx').textContent='$'+v+'K';
+      document.getElementById('cap-ptx-lbl').textContent='$'+v+'K';
+      var pp=48/v*100;
+      document.getElementById('bar-ptx').style.cssText='background:'+( pp>90?'var(--red)':pp>75?'var(--gold)':'var(--teal)')+';width:'+Math.min(100,pp)+'%';
+      break;
+    case'mon':
+      document.getElementById('sv-mon').textContent='$'+v+'M';
+      document.getElementById('cap-mon-lbl').textContent='$'+v.toFixed(1)+'M';
+      var pm=1.84/v*100;
+      document.getElementById('bar-mon').style.cssText='background:'+( pm>90?'var(--red)':pm>75?'var(--gold)':'var(--teal)')+';width:'+Math.min(100,pm)+'%';
+      break;
+  }
+}
+updateSlider('pct',8);updateSlider('abs',25);updateSlider('ptx',50);updateSlider('mon',5);
+
+// ═══ RECEIVERS ════════════════════════════════
+var fNm=['James','Sarah','Michael','Emma','David','Lisa','Robert','Jennifer','William','Patricia','Richard','Linda','Thomas','Barbara','Charles','Susan','Christopher','Jessica','Daniel','Karen','Mark','Nancy','Paul','Dorothy','Steven','Lisa','Andrew','Betty','Kenneth','Margaret','Joshua','Sandra','Kevin','Ashley','Brian','Kimberly','George','Emily','Timothy','Donna','Ronald','Carol','Edward','Michelle','Jason','Amanda','Jeffrey','Melissa','Ryan','Deborah','Gary','Stephanie','Jacob','Rebecca','Nicholas','Sharon','Eric','Laura','Jonathan','Cynthia','Stephen','Kathleen','Larry','Amy','Justin','Angela','Scott','Shirley','Brandon','Anna','Benjamin','Brenda','Samuel','Pamela','Frank','Emma','Gregory','Nicole','Raymond','Helen','Alexander','Samantha','Patrick','Katherine','Jack','Christine','Dennis','Debra','Jerry','Rachel','Tyler','Carolyn','Aaron','Janet','Jose','Catherine','Adam','Maria'];
+var lNm=['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Hernandez','Lopez','Gonzalez','Wilson','Anderson','Thomas','Taylor','Moore','Jackson','Martin','Lee','Perez','Thompson','White','Harris','Sanchez','Clark','Ramirez','Lewis','Robinson','Walker','Young','Allen','King','Wright','Scott','Torres','Nguyen','Hill','Flores','Green','Adams','Nelson','Baker','Hall','Rivera','Campbell','Mitchell','Carter','Roberts','Turner','Phillips','Evans','Collins','Stewart','Morris','Morgan','Reed','Cook','Bell','Murphy','Bailey','Cooper','Richardson','Cox','Howard','Ward','Peterson','Gray','Ramirez','Watson','Brooks','Kelly','Sanders','Price','Bennett','Wood','Barnes','Ross','Henderson','Coleman','Jenkins','Perry','Powell','Patterson','Hughes','Flores','Washington','Butler','Simmons','Foster','Gonzales','Bryant','Alexander','Russell','Griffin','Diaz','Hayes'];
+var depts=['Engineering','Finance','Sales','Marketing','Legal','Operations','HR','IT','R&D','Product','Compliance','Procurement'];
+
+var allEmployees=[];
+for(var i=0;i<500;i++){
+  var fn=fNm[i%fNm.length],ln=lNm[i%lNm.length];
+  allEmployees.push({name:fn+' '+ln,type:'employee',ccy:'USD',wallet:'USDC wallet',cs:false,dept:depts[i%depts.length],acct:'0x'+Math.random().toString(16).substr(2,4)+'…'+Math.random().toString(16).substr(2,4),freq:Math.floor(Math.random()*50)+1});
+}
+
+var supplierData=[
+  {name:'Supplier GmbH (DE)',type:'supplier',ccy:'EUR',wallet:'HSBC Orion',cs:true,acct:'IBAN DE89 3704…',freq:18},
+  {name:'Taiwan Mfg Co Ltd',type:'supplier',ccy:'SGD',wallet:'HSBC Orion',cs:true,acct:'SWIFT CTBCTWTP',freq:14},
+  {name:'UK Law Firm LLP',type:'supplier',ccy:'GBP',wallet:'HSBC Orion',cs:false,acct:'Sort 20-00-00 / 73456712',freq:9},
+  {name:'Argentina JV Partner',type:'supplier',ccy:'USD',wallet:'Kinexys',cs:false,acct:'0x4a2b…9f3c',freq:6},
+  {name:'Taipei Logistics Co',type:'supplier',ccy:'USD',wallet:'Kinexys',cs:false,acct:'SWIFT CTBCTWTP',freq:12},
+  {name:'München Automotive AG',type:'supplier',ccy:'EUR',wallet:'HSBC Orion',cs:true,acct:'IBAN DE45 8000…',freq:8},
+  {name:'Seoul Electronics Corp',type:'supplier',ccy:'USD',wallet:'Kinexys',cs:false,acct:'SWIFT KOEXKRSE',freq:5},
+  {name:'Sydney Consulting Pty',type:'supplier',ccy:'USD',wallet:'Kinexys',cs:false,acct:'BSB 033-002 / 12345678',freq:4},
+  {name:'Dubai Trade Partners',type:'supplier',ccy:'USD',wallet:'Citi Token Svcs',cs:true,acct:'IBAN AE46 0260…',freq:7},
+  {name:'São Paulo Exports SA',type:'supplier',ccy:'USD',wallet:'Kinexys',cs:false,acct:'SWIFT BRASBRRJ',freq:3},
+];
+var subsidiaryData=[
+  {name:'Acme SG Pte Ltd',type:'subsidiary',ccy:'SGD',wallet:'HSBC Orion',cs:true,acct:'Kinexys SG-001',freq:22},
+  {name:'Acme UK Ltd',type:'subsidiary',ccy:'GBP',wallet:'HSBC Orion',cs:true,acct:'Sort 40-47-84 / 70872490',freq:17},
+  {name:'Acme DE GmbH',type:'subsidiary',ccy:'EUR',wallet:'HSBC Orion',cs:true,acct:'IBAN DE89 5001…',freq:13},
+  {name:'Acme JP KK',type:'subsidiary',ccy:'USD',wallet:'Kinexys',cs:true,acct:'SWIFT MHCBJPJT',freq:11},
+  {name:'Acme AU Pty Ltd',type:'subsidiary',ccy:'USD',wallet:'Kinexys',cs:false,acct:'BSB 062-000',freq:9},
+  {name:'Acme CA Inc',type:'subsidiary',ccy:'USD',wallet:'Kinexys',cs:true,acct:'Transit 004 / 1234567',freq:8},
+  {name:'Acme IN Pvt Ltd',type:'subsidiary',ccy:'USD',wallet:'Kinexys',cs:false,acct:'IFSC HDFC0000001',freq:6},
+  {name:'Acme HK Ltd',type:'subsidiary',ccy:'USD',wallet:'HSBC Orion',cs:true,acct:'SWIFT HSBCHKHH',freq:10},
+  {name:'Acme FR SAS',type:'subsidiary',ccy:'EUR',wallet:'HSBC Orion',cs:true,acct:'IBAN FR76 3000…',freq:7},
+  {name:'Acme AE LLC',type:'subsidiary',ccy:'USD',wallet:'Citi Token Svcs',cs:true,acct:'IBAN AE07 0331…',freq:5},
+];
+
+var allReceivers=supplierData.concat(subsidiaryData).concat(allEmployees);
+var recvFilter='all';
+
+function buildRecvTable(rows){
+  var s=sym[activeCcy];
+  document.getElementById('recv-tbody').innerHTML=rows.slice(0,200).map(r=>{
+    var ico=r.type==='employee'?'👤':r.type==='subsidiary'?'🏢':'🏭';
+    return '<tr data-rtype="'+r.type+'">'
+      +'<td><strong>'+r.name+'</strong>'+(r.freq>10?'<span class="verified-badge" style="margin-left:6px">✓ Verified</span>':'')+'</td>'
+      +'<td><span class="badge '+(r.type==='supplier'?'b-x':r.type==='subsidiary'?'b-p':'b-b')+'">'+r.type+'</span></td>'
+      +'<td style="font-size:11px;color:var(--text-muted)">'+(r.acct||'USDC wallet')+'</td>'
+      +'<td>'+r.ccy+'</td>'
+      +'<td><span class="badge '+(r.wallet.includes('HSBC')?'b-t':r.wallet.includes('USDC')?'b-p':r.wallet.includes('Citi')?'b-p':'b-b')+'">'+r.wallet+'</span></td>'
+      +'<td>'+(r.cs?'<span class="csq">&gt;$500K</span>':'<span class="badge b-x">No</span>')+'</td>'
+      +'<td><span class="badge b-g">Verified</span></td>'
+      +'<td><button class="btn" style="font-size:10px;padding:2px 8px" onclick="useRecv(\''+r.name.replace(/'/g,"\\'")+'\')" >Use →</button></td>'
+      +'</tr>';
+  }).join('');
+  var total=rows.length;
+  document.getElementById('recv-count-label').textContent='Showing '+Math.min(200,total)+' of '+total+' receivers'+(total>200?' (refine search to see more)':'');
+}
+buildRecvTable(allReceivers);
+
+function filterRecvTbl(q){
+  var cat=recvFilter;
+  var rows=allReceivers.filter(r=>(cat==='all'||r.type===cat)&&(!q||r.name.toLowerCase().includes(q.toLowerCase())));
+  buildRecvTable(rows);
+}
+function fRecv(cat,btn){
+  recvFilter=cat;
+  document.querySelectorAll('#recv-seg .seg-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  filterRecvTbl(document.getElementById('recv-search').value);
+}
+function toggleAddRecv(){
+  var f=document.getElementById('add-recv-form');
+  var closed=(f.style.display===''||f.style.display==='none');
+  f.style.display=closed?'block':'none';
+  if(closed){nrStep(1);setTimeout(()=>f.scrollIntoView({behavior:'smooth',block:'start'}),80);}
+}
+function nrStep(n){
+  [1,2,3].forEach(function(i){
+    var s=document.getElementById('nr-s'+i); if(s)s.style.display=(i===n)?'block':'none';
+    var t=document.getElementById('nr-t'+i);
+    if(t){t.style.color=i===n?'var(--blue)':'var(--text-muted)';t.style.borderBottomColor=i===n?'var(--blue)':'transparent';t.style.fontWeight=i===n?'700':'500';}
+  });
+}
+function nrSanctionCheck(name){
+  if(name.length<4)return;
+  var box=document.getElementById('nr-sanction');
+  setTimeout(function(){
+    box.style.display='flex';
+    document.getElementById('nr-sanction-msg').textContent='Screening passed — '+name;
+  },600);
+}
+function nrDetectAddr(v){
+  var d=document.getElementById('nr-addr-detected');
+  if(!v){d.textContent='';return;}
+  if(/^[A-Z]{2}[0-9]{2}/.test(v.toUpperCase()))d.textContent='💳 Detected: IBAN';
+  else if(v.startsWith('0x')&&v.length>=40)d.textContent='🔷 Detected: EVM wallet address';
+  else if(v.length>=32&&v.length<=44&&/^[1-9A-HJ-NP-Za-km-z]+$/.test(v))d.textContent='🌟 Detected: Solana wallet address';
+  else if(/^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]/.test(v.toUpperCase()))d.textContent='🌐 Detected: SWIFT / BIC code';
+  else if(/^[0-9]{6,}$/.test(v.replace(/[-\s]/g,'')))d.textContent='🏦 Detected: Bank account / sort code';
+  else d.textContent='';
+}
+function nrVerifyAddr(){
+  var v=document.getElementById('nr-acct').value.trim();
+  var st=document.getElementById('nr-addr-status');
+  if(!v){alert('Please enter an address first.');return;}
+  st.style.display='block';st.className='ar ar-i';
+  st.innerHTML='<div class="ar-dot" style="background:var(--blue)"></div><div><strong>Verifying…</strong><small>Checking address and screening.</small></div>';
+  setTimeout(function(){
+    st.className='ar ar-s';
+    st.innerHTML='<div class="ar-dot" style="background:var(--green)"></div><div><strong>Address verified ✓</strong><small>Valid format. No sanctions flags detected. Ready to receive payments.</small></div>';
+  },1200);
+}
+function nrValidateBic(el){
+  var v=el.value.toUpperCase().replace(/\s/g,'');el.value=v;
+  var m=document.getElementById('nr-swift-msg');
+  if(v.length===8||v.length===11){m.textContent='✓ Valid BIC format';m.style.color='var(--green)';}
+  else if(v.length>0){m.textContent='BIC should be 8 or 11 characters ('+v.length+' entered)';m.style.color='var(--gold)';}
+  else{m.textContent='';}
+}
+function nrLookupSwift(){
+  var v=document.getElementById('nr-swift').value.trim();
+  if(!v){alert('Enter a SWIFT/BIC code first.');return;}
+  var m=document.getElementById('nr-swift-msg');
+  m.textContent='Searching SWIFT directory…';m.style.color='var(--text-muted)';
+  setTimeout(function(){m.textContent='✓ '+v+' found — valid correspondent bank in SWIFT directory.';m.style.color='var(--green)';},800);
+}
+function nrKycUpload(type,input){
+  if(!input.files[0])return;
+  if(type==='id'){
+    document.getElementById('nr-kyc-id-ico').style.background='var(--green-l)';
+    document.getElementById('nr-kyc-id-ico').style.color='var(--green)';
+    document.getElementById('nr-kyc-id-ico').textContent='✓';
+    document.getElementById('nr-kyc-id-st').style.background='var(--green-l)';
+    document.getElementById('nr-kyc-id-st').style.color='var(--green)';
+    document.getElementById('nr-kyc-id-st').textContent='Uploaded';
+    document.getElementById('nr-kyc-id-ok').style.display='block';
+  } else {
+    document.getElementById('nr-kyc-addr-ico').style.background='var(--green-l)';
+    document.getElementById('nr-kyc-addr-ico').style.color='var(--green)';
+    document.getElementById('nr-kyc-addr-ico').textContent='✓';
+    document.getElementById('nr-kyc-addr-st').style.background='var(--green-l)';
+    document.getElementById('nr-kyc-addr-st').style.color='var(--green)';
+    document.getElementById('nr-kyc-addr-st').textContent='Uploaded';
+    document.getElementById('nr-kyc-addr-ok').style.display='block';
+  }
+}
+function saveRecv(){
+  var n=document.getElementById('nr-name').value.trim();if(!n){alert('Please enter a name on Step 1.');return;}
+  var t=document.getElementById('nr-type').value;
+  var ccy=document.getElementById('nr-ccy').value;
+  var acct=document.getElementById('nr-acct').value.trim()||'—';
+  var prefWall=(document.getElementById('nr-prefwall')||{value:'kinexys'}).value;
+  var kyc=(document.getElementById('nr-kyc-status')||{value:'pending'}).value;
+  var ico=t==='employee'?'👤':t==='subsidiary'?'🏢':'🏭';
+  var newR={name:n,type:t,ccy:ccy,wallet:prefWall,cs:(t==='subsidiary'),acct:acct,freq:1,ico:ico};
+  allReceivers.unshift(newR);
+  frequentReceivers.unshift({name:n,type:t,ccy:ccy,wall:prefWall,cs:newR.cs,freq:1,ico:ico});
+  buildRecvTable(allReceivers);
+  document.getElementById('recv-count').textContent=allReceivers.length;
+  var ok=document.getElementById('nr-ok');
+  document.getElementById('nr-ok-title').textContent=n+' added successfully';
+  document.getElementById('nr-ok-sub').textContent='KYC status: '+kyc+'. Visible in receiver search immediately.';
+  ok.style.display='flex';
+  showToast('Receiver added',n+' is now available in the payment receiver search.');
+  ['nr-name','nr-taxid','nr-acct','nr-acct2','nr-swift'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  setTimeout(function(){
+    ok.style.display='none';
+    document.getElementById('add-recv-form').style.display='none';
+    var tbl=document.getElementById('recv-tbl');if(tbl)tbl.scrollIntoView({behavior:'smooth',block:'start'});
+  },2800);
+}
+
+// ═══ LINKED ACCOUNTS (grouped by bank, function, currency) ════════
+var linkedAccounts=[
+  {id:'jpm-op-usd',  bank:'JPMorgan',   func:'Operating',  ccy:'USD', label:'JPMorgan Operating — USD',     balance:'$32,100,000',  balUSD:32100000,  gl:'GL-1402', wall:'swift',    accountType:'fiat'},
+  {id:'jpm-res-usd', bank:'JPMorgan',   func:'Reserve',    ccy:'USD', label:'Kinexys Reserve — USD',         balance:'$38,100,000',  balUSD:38100000,  gl:'GL-1320', wall:'kinexys',  accountType:'tokenized'},
+  {id:'jpm-pay-usd', bank:'JPMorgan',   func:'Payment',    ccy:'USD', label:'Kinexys Payment Wallet — USD',  balance:'$18,500,000',  balUSD:18500000,  gl:'GL-1323', wall:'kinexys',  accountType:'tokenized'},
+  {id:'hsbc-res-gbp',bank:'HSBC',       func:'Reserve',    ccy:'GBP', label:'HSBC Orion Reserve — GBP',      balance:'£6,200,000',   balUSD:7826000,   gl:'GL-1321', wall:'orion',    accountType:'tokenized'},
+  {id:'hsbc-res-sgd',bank:'HSBC',       func:'Reserve',    ccy:'SGD', label:'HSBC Orion Reserve — SGD',      balance:'SGD 8,400,000',balUSD:6260000,   gl:'GL-1322', wall:'orion',    accountType:'tokenized'},
+  {id:'hsbc-pay-eur',bank:'HSBC',       func:'Payment',    ccy:'EUR', label:'HSBC Orion Payment — EUR',      balance:'€5,100,000',   balUSD:5537000,   gl:'GL-1324', wall:'orion',    accountType:'tokenized'},
+  {id:'citi-pay-usd',bank:'Citibank',   func:'Payment',    ccy:'USD', label:'Citi Token Services — USD',     balance:'$9,600,000',   balUSD:9600000,   gl:'GL-1325', wall:'citi',     accountType:'tokenized'},
+  {id:'circle-usd',  bank:'Circle',     func:'Restricted', ccy:'USD', label:'USDC Employee Wallet — USD',    balance:'$12,400,000',  balUSD:12400000,  gl:'GL-1326', wall:'usdc',     accountType:'stablecoin'},
+  {id:'pp-usd',      bank:'PayPal',     func:'Restricted', ccy:'USD', label:'PYUSD Petty Cash — USD',        balance:'$5,800,000',   balUSD:5800000,   gl:'GL-1327', wall:'usdc',     accountType:'stablecoin'},
+  {id:'gm-hysa-usd', bank:'Goldman',    func:'Savings',    ccy:'USD', label:'Goldman HYSA — USD',            balance:'$41,200,000',  balUSD:41200000,  gl:'GL-1400', wall:'swift',    accountType:'fiat'},
+  {id:'van-mmf-usd', bank:'Vanguard',   func:'Savings',    ccy:'USD', label:'Vanguard VMFXX — USD',          balance:'$74,000,000',  balUSD:74000000,  gl:'GL-1401', wall:'swift',    accountType:'fiat'},
+  {id:'wells-cd-usd',bank:'Wells Fargo',func:'Savings',    ccy:'USD', label:'Wells Fargo 60d CD — USD',      balance:'$25,000,000',  balUSD:25000000,  gl:'GL-1403', wall:'swift',    accountType:'fiat'},
+];
+var selSourceAcct=null;
+var acctGroupOpen={};
+
+function buildAcctSelector(){
+  var banks={};
+  linkedAccounts.forEach(function(a){if(!banks[a.bank])banks[a.bank]=[];banks[a.bank].push(a);});
+  var html='';
+  Object.keys(banks).forEach(function(bank){
+    var key=bank.replace(/\s+/g,'_');
+    var isOpen=(acctGroupOpen[key]!==false);
+    var accts=banks[bank];
+    html+='<div style="margin-bottom:6px">';
+    html+='<div class="acct-bank-hdr" data-key="'+key+'" onclick="toggleBankGroup(this.dataset.key)">'
+      +'<span style="font-weight:700">'+bank+'</span>'
+      +'<span id="achev-'+key+'">'+( isOpen?'▾':'▸')+'</span>'
+      +'</div>';
+    html+='<div id="agrp-'+key+'" style="display:'+(isOpen?'block':'none')+';padding-left:6px">';
+    // sub-group by function
+    var funcs={};
+    accts.forEach(function(a){if(!funcs[a.func])funcs[a.func]=[];funcs[a.func].push(a);});
+    Object.keys(funcs).forEach(function(fn){
+      html+='<div class="acct-func-lbl">'+fn+'</div>';
+      funcs[fn].forEach(function(a){
+        var sel=(selSourceAcct&&selSourceAcct.id===a.id);
+        html+='<div class="acct-card'+(sel?' sel':'')+'" data-aid="'+a.id+'" onclick="pickSourceAcct(this.dataset.aid)">'
+          +'<div style="flex:1;min-width:0">'
+            +'<div style="font-size:12px;font-weight:600">'+a.label+'</div>'
+            +'<div style="font-size:11px;color:var(--text-muted);margin-top:1px">'+a.balance+' · '+a.gl+'</div>'
+          +'</div>'
+          +'<span class="badge '+(sel?'b-b':'b-x')+'">'+a.ccy+'</span>'
+          +'</div>';
+      });
+    });
+    html+='</div></div>';
+  });
+  var el=document.getElementById('acct-selector-inner');
+  if(el)el.innerHTML=html;
+}
+function toggleBankGroup(key){
+  acctGroupOpen[key]=(acctGroupOpen[key]===false)?true:false;
+  var grp=document.getElementById('agrp-'+key);
+  var chev=document.getElementById('achev-'+key);
+  if(grp)grp.style.display=(acctGroupOpen[key]===false)?'none':'block';
+  if(chev)chev.textContent=(acctGroupOpen[key]===false)?'▸':'▾';
+}
+function pickSourceAcct(id){
+  selSourceAcct=linkedAccounts.find(function(a){return a.id===id;});
+  if(!selSourceAcct)return;
+  // Sync currency to account
+  var ccyEl=document.getElementById('p-ccy');
+  for(var i=0;i<ccyEl.options.length;i++){if(ccyEl.options[i].value===selSourceAcct.ccy){ccyEl.selectedIndex=i;break;}}
+  // Sync wallet to account
+  var wEl=document.getElementById('p-wall');
+  for(var i=0;i<wEl.options.length;i++){if(wEl.options[i].value===selSourceAcct.wall){wEl.selectedIndex=i;break;}}
+  var lbl=document.getElementById('src-acct-label');
+  if(lbl){
+    lbl.textContent='Debit from: '+selSourceAcct.label+' ('+selSourceAcct.balance+')';
+    lbl.style.color='var(--blue)';lbl.style.fontWeight='600';
+  }
+  buildAcctSelector();
+  updateFeeCalc();
+  // Close picker
+  var panel=document.getElementById('acct-picker-panel');
+  if(panel)panel.style.display='none';
+}
+function toggleAcctPicker(){
+  var p=document.getElementById('acct-picker-panel');
+  if(!p)return;
+  var open=(p.style.display==='block');
+  p.style.display=open?'none':'block';
+  if(!open)buildAcctSelector();
+}
+
+// ═══ PAYMENT FORM ════════════════════════════
+var selRecv=null;
+var attachments=[];
+
+var selectedRail='kinexys';
+
+// All available rails with live-simulated fees
+var railData=[
+  {id:'kinexys',name:'Kinexys Digital Payments',provider:'JPMorgan',icon:'🔵',rate:0.0005,min:50,speed:'T+0',settle:'Instant (tokenized)',networks:['USD','GBP','SGD','EUR'],recommended:false,type:'tokenized'},
+  {id:'orion',name:'HSBC Orion',provider:'HSBC',icon:'🔴',rate:0.0008,min:75,speed:'T+0–T+1',settle:'Same/next day',networks:['GBP','SGD','EUR','USD'],recommended:false,type:'tokenized'},
+  {id:'citi',name:'Citi Token Services',provider:'Citibank',icon:'🔷',rate:0.0004,min:100,speed:'T+0',settle:'Instant (tokenized)',networks:['USD'],recommended:false,type:'tokenized'},
+  {id:'usdc',name:'USDC / Circle',provider:'Circle',icon:'💎',rate:0.0001,min:1.5,speed:'~30s',settle:'On-chain confirmation',networks:['USD'],recommended:false,type:'stablecoin'},
+  {id:'swift',name:'SWIFT GPI',provider:'SWIFT network',icon:'🌐',rate:0.0025,min:25,speed:'T+1–T+3',settle:'International wire',networks:['USD','GBP','SGD','EUR'],recommended:false,type:'traditional'},
+  {id:'sepa',name:'SEPA Instant',provider:'EBA Clearing',icon:'🇪🇺',rate:0.0005,min:0.2,speed:'T+0 (10s)',settle:'Pan-European instant',networks:['EUR'],recommended:false,type:'traditional'},
+  {id:'paynow',name:'PayNow / FAST',provider:'MAS / ABS',icon:'🇸🇬',rate:0,min:0,speed:'T+0 (real-time)',settle:'Singapore instant',networks:['SGD'],recommended:false,type:'traditional'},
+  {id:'fps',name:'Faster Payments',provider:'Pay.UK',icon:'🇬🇧',rate:0,min:0,speed:'T+0 (real-time)',settle:'UK instant',networks:['GBP'],recommended:false,type:'traditional'},
+];
+
+function getRailFee(rail,usdAmt){
+  return Math.max(rail.min,usdAmt*rail.rate);
+}
+
+function buildRailPicker(usdAmt,activeCcyParam){
+  var ccyForRails=activeCcyParam||document.getElementById('p-ccy').value;
+  var curType=document.getElementById('p-type')?document.getElementById('p-type').value:'vendor';
+  var stableT2=['payroll','expense','contractor'];
+
+  // Filter by currency support
+  var all=railData.filter(function(r){return r.networks.includes(ccyForRails);});
+
+  // Mark locked: USDC locked for non-employee payment types
+  all.forEach(function(r){
+    r._locked=(r.id==='usdc'&&!stableT2.includes(curType));
+  });
+
+  // Check balance sufficiency AND type compatibility for selected source account
+  var railToWall2={kinexys:'kinexys',orion:'orion',citi:'citi',usdc:'usdc',swift:'swift',sepa:'orion',paynow:'orion',fps:'orion'};
+  var railToType2={kinexys:'tokenized',orion:'tokenized',citi:'tokenized',usdc:'stablecoin',swift:'fiat',sepa:'tokenized',paynow:'tokenized',fps:'tokenized'};
+  all.forEach(function(r){
+    r._insufficientBal=false;
+    r._typeMismatch=false;
+    if(selSourceAcct){
+      // Type compatibility check: fiat accounts cannot use blockchain rails
+      var reqType=railToType2[r.id]||'tokenized';
+      if(selSourceAcct.accountType&&selSourceAcct.accountType!==reqType){
+        r._typeMismatch=true;
+      }
+      // Balance check (only if type matches)
+      if(!r._typeMismatch&&usdAmt>0&&selSourceAcct.balUSD){
+        var wallMatch=(selSourceAcct.wall===r.id||selSourceAcct.wall===railToWall2[r.id]);
+        if(wallMatch&&usdAmt>selSourceAcct.balUSD){
+          r._insufficientBal=true;
+        }
+      }
+    }
+  });
+
+  // Split into available (selectable) and locked (USDC disabled)
+  var avail=all.filter(function(r){return !r._locked;});
+  var lockedRails=all.filter(function(r){return r._locked;});
+
+  // Recommended = lowest fee among rails that:
+  //   1. Have sufficient balance in selected account (balance takes precedence)
+  //   2. Are not type-mismatched
+  //   3. Are not locked (USDC restriction)
+  // If NO sufficient-balance rail exists, fall back to lowest fee among type-compatible rails.
+  avail.forEach(function(r){r.recommended=false;});
+  var sufficientAndCompatible=avail.filter(function(r){return !r._insufficientBal&&!r._typeMismatch;});
+  var compatibleOnly=avail.filter(function(r){return !r._typeMismatch;});
+  var pool=sufficientAndCompatible.length?sufficientAndCompatible:compatibleOnly;
+  if(pool.length){
+    var fees=pool.map(function(r){return {id:r.id,fee:getRailFee(r,usdAmt)};});
+    fees.sort(function(a,b){return a.fee-b.fee;});
+    var lowestId=fees[0].id;
+    avail.forEach(function(r){r.recommended=(r.id===lowestId);});
+  }
+
+  // Sort available: recommended first, then insufficient balance at bottom, then by fee
+  avail.sort(function(a,b){
+    if(a.recommended&&!b.recommended)return -1;
+    if(!a.recommended&&b.recommended)return 1;
+    // Type mismatch: push to bottom
+    if(a._typeMismatch&&!b._typeMismatch)return 1;
+    if(!a._typeMismatch&&b._typeMismatch)return -1;
+    if(a._insufficientBal&&!b._insufficientBal)return 1;
+    if(!a._insufficientBal&&b._insufficientBal)return -1;
+    return getRailFee(a,usdAmt)-getRailFee(b,usdAmt);
+  });
+
+  function renderCard(r){
+    var fee=getRailFee(r,usdAmt);
+    var feeStr=fee===0?'Free':fee<1?'$'+fee.toFixed(2):fee<100?'$'+fee.toFixed(2):'$'+Math.round(fee).toLocaleString();
+    var sel=(selectedRail===r.id);
+    var cantUse=(r._locked||r._typeMismatch);
+    var opacity=cantUse?0.35:r._insufficientBal?0.55:1;
+    var cursor=cantUse?'not-allowed':'pointer';
+    var cardClass='rail-card'+(r.recommended?' recommended':'')+(sel?' selected':'');
+    var clickAttr=cantUse?'':'onclick=\'selectRail("'+r.id+'")\' ';
+    var extraStyle='opacity:'+opacity+';cursor:'+cursor+';';
+    var tag='';
+    if(r.recommended) tag='<div class="rail-rec-tag">&#9889; Lowest fee</div>';
+    else if(r._typeMismatch) tag='<div class="rail-rec-tag" style="background:var(--text-muted)">N/A</div>';
+    else if(r._insufficientBal) tag='<div class="rail-rec-tag" style="background:var(--red)">&#9888; Low balance</div>';
+    var acctT=selSourceAcct&&selSourceAcct.accountType||'';
+    var reqT=railTypeMap&&railTypeMap[r.id]||'';
+    var subTag='';
+    if(r._typeMismatch){
+      if(acctT==='fiat'&&reqT==='tokenized') subTag='<div style="font-size:9px;color:var(--text-muted);margin-top:2px">Fiat accounts cannot use blockchain rails</div>';
+      else if(acctT==='fiat'&&reqT==='stablecoin') subTag='<div style="font-size:9px;color:var(--text-muted);margin-top:2px">Fiat accounts cannot use stablecoin rails</div>';
+      else if(acctT==='tokenized'&&reqT==='fiat') subTag='<div style="font-size:9px;color:var(--text-muted);margin-top:2px">Use tokenized rail for this account type</div>';
+      else if(acctT==='stablecoin'&&reqT==='fiat') subTag='<div style="font-size:9px;color:var(--text-muted);margin-top:2px">Stablecoin accounts use on-chain rails only</div>';
+      else subTag='<div style="font-size:9px;color:var(--text-muted);margin-top:2px">Incompatible with selected account</div>';
+    } else if(r._insufficientBal){
+      subTag='<div style="font-size:9px;color:var(--red);margin-top:2px;font-weight:600">Insufficient balance in selected account</div>';
+    } else if(r._locked){
+      subTag='<div style="font-size:9px;color:var(--text-muted);margin-top:2px">Low-value employee payments only</div>';
+    }
+    return '<div class="'+cardClass+'" '+clickAttr+'style="'+extraStyle+'">'
+      +tag
+      +'<div style="margin-bottom:4px">'
+        +'<span class="rail-name">'+r.name+'</span>'
+        +' <span style="font-size:10px;color:var(--text-muted)">'+r.provider+'</span>'
+      +'</div>'
+      +'<div class="rail-meta">'
+        +'<span class="rail-fee">'+feeStr+'</span>'
+        +'<span class="rail-speed">'+r.speed+'</span>'
+        +'<span style="font-size:10px;color:var(--text-muted)">'+r.settle+'</span>'
+      +'</div>'
+      +subTag
+      +'</div>';
+  }
+
+  var grid=document.getElementById('rail-picker-grid');
+  // Available rails first (recommended at top), locked USDC always at bottom
+  grid.innerHTML=avail.map(renderCard).join('')+lockedRails.map(renderCard).join('');
+}
+
+// Map each rail id to the linkedAccount wall values it can use
+// Rail compatibility rules:
+// - Tokenized rails (kinexys, orion, citi): ONLY tokenized deposit accounts
+// - Stablecoin rails (usdc): ONLY stablecoin accounts
+// - SWIFT: ONLY fiat/traditional bank accounts (Goldman, Vanguard, Wells Fargo, JPM Operating fiat)
+// - Local rails (sepa, paynow, fps): ONLY tokenized accounts for that currency (HSBC Orion)
+//   These are interoperable because HSBC Orion has FCA/MAS connectivity, not pure blockchain
+var railTypeMap={
+  kinexys:'tokenized',
+  orion:'tokenized',
+  citi:'tokenized',
+  usdc:'stablecoin',
+  swift:'fiat',
+  sepa:'tokenized',   // HSBC Orion EUR (tokenized deposit with SEPA gateway)
+  paynow:'tokenized', // HSBC Orion SGD (tokenized deposit with PayNow gateway)
+  fps:'tokenized',    // HSBC Orion GBP (tokenized deposit with FPS gateway)
+};
+// For tokenized local rails, also constrain to specific wall
+var railWallMap={
+  kinexys:'kinexys',
+  orion:'orion',
+  citi:'citi',
+  usdc:'usdc',
+  sepa:'orion',
+  paynow:'orion',
+  fps:'orion',
+};
+
+function buildRailAcctSelector(railId){
+  var ccyNow=document.getElementById('p-ccy').value;
+  var usdAmt=parseAmt(document.getElementById('p-amt').value)/FX[ccyNow];
+  var requiredType=railTypeMap[railId]||'tokenized';
+  var requiredWall=railWallMap[railId]||null; // null means any wall of that type
+
+  var accts=linkedAccounts.filter(function(a){
+    // Must match account type (tokenized/fiat/stablecoin)
+    if(a.accountType!==requiredType)return false;
+    // If specific wall required, enforce it
+    if(requiredWall&&a.wall!==requiredWall)return false;
+    // Currency must match (except SWIFT which shows all USD fiat accounts)
+    if(railId==='swift')return true; // SWIFT shows all fiat regardless of currency
+    return a.ccy===ccyNow;
+  });
+
+  var wrapper=document.getElementById('rail-acct-selector');
+  var grid=document.getElementById('rail-acct-grid');
+  var lbl=document.getElementById('rail-acct-label');
+
+  if(!accts.length){wrapper.style.display='none';return;}
+
+  lbl.textContent='Debit from account ('+(accts.length+' available')+')';
+  wrapper.style.display='block';
+
+  grid.innerHTML=accts.map(function(a){
+    var sel=(selSourceAcct&&selSourceAcct.id===a.id);
+    var isInsuf=(usdAmt>0&&a.balUSD&&usdAmt>a.balUSD);
+    var cls='rail-acct-card'+(sel?' sel':'')+(isInsuf?' insuf':'');
+    var clickAttr=isInsuf?'title="Insufficient balance"':'data-aid="'+a.id+'" onclick="pickRailAcct(this.dataset.aid)"';
+    var balColor=isInsuf?'color:var(--red)':'color:var(--text-muted)';
+    var insufTag=isInsuf?'<span style="font-size:10px;color:var(--red);font-weight:700;margin-left:6px">⚠ Low</span>':'';
+    return '<div class="'+cls+'" '+clickAttr+'>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-weight:600">'+a.label+'</div>'
+        +'<div style="font-size:11px;margin-top:1px;'+balColor+'">'+a.balance+' available · '+a.func+' · '+a.gl+'</div>'
+      +'</div>'
+      +'<span class="badge '+(sel?'b-b':'b-x')+'">'+a.ccy+'</span>'
+      +insufTag
+      +'</div>';
+  }).join('');
+}
+
+function pickRailAcct(id){
+  selSourceAcct=linkedAccounts.find(function(a){return a.id===id;});
+  if(!selSourceAcct)return;
+  // Rebuild sub-selector to reflect new selection (highlight)
+  buildRailAcctSelector(selectedRail);
+  // Rebuild rail picker to update balance warnings
+  var ccyNow=document.getElementById('p-ccy').value;
+  buildRailPicker(parseAmt(document.getElementById('p-amt').value)/FX[ccyNow], ccyNow);
+  updateFeeCalc();
+}
+
+function selectRail(id){
+  selectedRail=id;
+  document.getElementById('p-wall').value=id;
+  var ccyNow=document.getElementById('p-ccy').value;
+  buildRailPicker(parseAmt(document.getElementById('p-amt').value)/FX[ccyNow], ccyNow);
+  buildRailAcctSelector(id);
+  updateFeeCalc();
+}
+
+function updateFeeCalc(){
+  var amt=parseAmt(document.getElementById('p-amt').value);
+  var ccy=document.getElementById('p-ccy').value;
+  var type=document.getElementById('p-type').value;
+  var usdAmt=amt/FX[ccy];
+  var stableT=['payroll','expense','contractor'];
+  // Only reset selectedRail if it's not valid for this currency
+  var currentRail=railData.find(r=>r.id===selectedRail);
+  var railInvalid=(!currentRail||!currentRail.networks.includes(ccy));
+  // Stablecoin (USDC) auto-selects ONLY for low-value employee payment types
+  // For all other types, if current rail is invalid, pick best default for currency — user can override freely
+  if(railInvalid){
+    if(stableT.includes(type))selectedRail='usdc';
+    else if(ccy==='SGD')selectedRail='paynow';
+    else if(ccy==='GBP')selectedRail='fps';
+    else if(ccy==='EUR')selectedRail='sepa';
+    else selectedRail='kinexys';
+  }
+  // If user is on USDC but payment type is not low-value, bump them off it
+  if(selectedRail==='usdc'&&!stableT.includes(type)){
+    selectedRail='kinexys';
+  }
+  document.getElementById('p-wall').value=selectedRail;
+  buildRailPicker(amt>0?usdAmt:0,ccy);
+  buildRailAcctSelector(selectedRail);
+  var rail=railData.find(r=>r.id===selectedRail)||railData[0];
+  var feeUSD=getRailFee(rail,usdAmt);
+  var feeStr=feeUSD===0?'Free ($0.00)':'$'+feeUSD.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' (est.)';
+  // FX conversion only applies when transfer currency ≠ source account base currency
+  var acctBaseCcy=selSourceAcct?selSourceAcct.ccy:'USD';
+  var hasFX=(ccy!==acctBaseCcy);
+  var fxUSD=0;
+  var fxStr='None';
+  if(hasFX&&amt>0){
+    // ~0.02% spread on the converted amount
+    fxUSD=(amt/FX[ccy])*0.0002;
+    fxStr='Spread ~0.02% ($'+fxUSD.toFixed(2)+') · '+acctBaseCcy+'→'+ccy;
+  }
+  // Platform transfer fee: 10 bps on all rails except PayNow/FAST
+  var noplatformRails=['paynow','fps'];
+  var platformBps=(noplatformRails.indexOf(selectedRail)>-1)?0:0.001;
+  var platformFeeUSD=usdAmt*platformBps;
+  var platformStr=platformBps===0?'Waived (PayNow/FAST)':'10 bps ($'+platformFeeUSD.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+')';
+  // Total = principal + rail fee + fx + platform
+  var totalAddedUSD=feeUSD+fxUSD+platformFeeUSD;
+  var s=sym[ccy];
+  document.getElementById('fee-box').style.display=amt>0?'block':'none';
+  document.getElementById('appr-tier-box').style.display=amt>0?'block':'none';
+  // Show/hide FX row
+  var fxRow=document.getElementById('fee-fx-row');
+  if(fxRow)fxRow.style.display=hasFX?'flex':'none';
+  if(amt>0){
+    document.getElementById('fee-principal').textContent=s+amt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('fee-label').textContent=rail.name+' fee ('+rail.provider+')';
+    document.getElementById('fee-amount').textContent=feeStr;
+    document.getElementById('fee-fx').textContent=fxStr;
+    document.getElementById('fee-platform').textContent=platformStr;
+    document.getElementById('fee-total-val').textContent=s+(amt+(totalAddedUSD*FX[ccy])).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('fee-settle-info').textContent='⏱ Expected settlement: '+rail.speed+' · '+rail.settle;
+    if(usdAmt<100000)document.getElementById('appr-tier-box').innerHTML='<div class="appr-tier appr-none">✓ Auto-release — no approval required (below $100K)</div>';
+    else if(usdAmt<500000)document.getElementById('appr-tier-box').innerHTML='<div class="appr-tier appr-treas">✍ Treasurer approval (you) — $100K–$500K tier</div>';
+    else document.getElementById('appr-tier-box').innerHTML='<div class="appr-tier appr-2of2">⚡ 2-of-2 required — you sign first → CFO Sarah Chen</div>';
+  }
+  var warnBox=document.getElementById('p-warn');warnBox.style.display='none';
+  var ptxLim=parseFloat(document.getElementById('sl-ptx').value)*1000;
+  if(stableT.includes(type)&&usdAmt>ptxLim){warnBox.style.display='block';warnBox.innerHTML='⚠ Exceeds per-tx stablecoin limit ($'+Math.round(ptxLim/1000)+'K). Consider switching to Kinexys rail.';}
+}
+
+// Init rail picker on page load
+setTimeout(()=>{buildRailPicker(0,'USD');buildAcctSelector();},100);
+
+function toggleAcctPicker(){
+  var p=document.getElementById('acct-picker-panel');
+  if(!p)return;
+  var open=(p.style.display==='block');
+  p.style.display=open?'none':'block';
+  if(!open){buildAcctSelector();}
+}
+
+
+
+// ═══ RECEIVER DROPDOWN ═══════════════════════════════════════
+var frequentReceivers=[
+  {name:'Acme SG Pte Ltd',type:'subsidiary',ccy:'SGD',wall:'HSBC Orion',cs:true,freq:22,ico:'🏢'},
+  {name:'Acme UK Ltd',type:'subsidiary',ccy:'GBP',wall:'HSBC Orion',cs:true,freq:17,ico:'🏢'},
+  {name:'Supplier GmbH (DE)',type:'supplier',ccy:'EUR',wall:'HSBC Orion',cs:true,freq:18,ico:'🏭'},
+  {name:'Taiwan Mfg Co Ltd',type:'supplier',ccy:'SGD',wall:'HSBC Orion',cs:true,freq:14,ico:'🏭'},
+  {name:'Taipei Logistics Co',type:'supplier',ccy:'USD',wall:'Kinexys',cs:false,freq:12,ico:'🏭'},
+  {name:'James Smith',type:'employee',ccy:'USD',wall:'USDC wallet',cs:false,freq:45,ico:'👤'},
+  {name:'Sarah Johnson',type:'employee',ccy:'USD',wall:'USDC wallet',cs:false,freq:38,ico:'👤'},
+];
+
+function showFrequent(){
+  var dd=document.getElementById('p-recv-dd');
+  if(dd.style.display==='block'){dd.style.display='none';return;}
+  renderRecvDD(frequentReceivers,true);
+  dd.style.display='block';
+}
+function searchRecv(q){
+  if(!q){showFrequent();return;}
+  var m=allReceivers.filter(function(r){return r.name.toLowerCase().includes(q.toLowerCase());}).slice(0,10);
+  renderRecvDD(m,false);
+  document.getElementById('p-recv-dd').style.display='block';
+}
+function renderRecvDD(list,isFrequent){
+  var dd=document.getElementById('p-recv-dd');
+  if(!list.length){dd.innerHTML='<div style="padding:10px 12px;font-size:12px;color:var(--text-muted)">No match found</div>';return;}
+  var html='';
+  if(isFrequent)html+='<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--bg-card2)">⭐ Frequently used</div>';
+  html+=list.map(function(r){
+    var ico=r.ico||(r.type==='employee'?'👤':r.type==='subsidiary'?'🏢':'🏭');
+    var wall=r.wall||r.wallet||'Kinexys';
+    var safeN=r.name.replace(/'/g,"\'");
+    return '<div class="rcard'+(isFrequent?' frequent':'')+'" data-rname="'+r.name.replace(/"/g,'&quot;')+'" onclick="pickRecv(this.dataset.rname)">'
+      +'<div style="width:26px;height:26px;border-radius:6px;background:var(--bg-card2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">'+ico+'</div>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-weight:600;font-size:12px">'+r.name+'</div>'
+        +'<div style="font-size:11px;color:var(--text-muted)">'+r.type+' · '+r.ccy+' · '+wall+'</div>'
+      +'</div>'
+      +(r.freq>10?'<span class="verified-badge">✓ Verified</span>':'')
+      +(r.cs?'<span class="csq" style="margin-left:4px">2-of-2</span>':'')
+      +'</div>';
+  }).join('');
+  dd.innerHTML=html;
+}
+function pickRecv(name){
+  var found=allReceivers.find(function(r){return r.name===name;});
+  if(!found)found=frequentReceivers.find(function(r){return r.name===name;});
+  selRecv=found||{name:name,ccy:'USD',wall:'kinexys',cs:false,type:'supplier'};
+  document.getElementById('p-recv-in').value=name;
+  document.getElementById('p-recv-dd').style.display='none';
+  var d=document.getElementById('p-recv-sel');
+  d.style.display='block';
+  var wall=selRecv.wall||selRecv.wallet||'Kinexys';
+  d.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
+    +'<div><strong>'+selRecv.name+'</strong>'+(selRecv.freq>10?'<span class="verified-badge" style="margin-left:5px">✓ Verified</span>':'')
+    +'<div style="font-size:11px;color:var(--text-muted);margin-top:2px">'+selRecv.type+' · '+wall+(selRecv.cs?' · CFO co-sign required >$500K':'')+'</div></div>'
+    +(selRecv.cs?'<span class="csq">2-of-2</span>':'<span class="badge b-g">No co-sign</span>')
+    +'</div>';
+  // Sync currency
+  var ccyEl=document.getElementById('p-ccy');
+  var rccy=selRecv.ccy||'USD';
+  for(var i=0;i<ccyEl.options.length;i++){if(ccyEl.options[i].value===rccy){ccyEl.selectedIndex=i;break;}}
+  updateFeeCalc();
+}
+function useRecv(name){nav(document.querySelectorAll('.nav-btn')[3],'pg-pay');setTimeout(function(){pickRecv(name);},80);}
+
+// Close dropdown on outside click
+document.addEventListener('click',function(e){
+  var dd=document.getElementById('p-recv-dd');
+  if(!dd)return;
+  if(!dd.contains(e.target)&&e.target.id!=='p-recv-in'&&!e.target.closest('button[onclick*="showFrequent"]'))
+    dd.style.display='none';
+});
+
+// ═══ AMOUNT FORMATTING ════════════════════════════════════════
+function onAmtInput(el){
+  var pos=el.selectionStart;
+  var raw=el.value.replace(/[^0-9.]/g,'');
+  var pts=raw.split('.');if(pts.length>2)raw=pts[0]+'.'+pts.slice(1).join('');
+  pts=raw.split('.');
+  var intP=pts[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  var fmt=pts.length>1?intP+'.'+pts[1]:intP;
+  var diff=fmt.length-el.value.length;
+  el.value=fmt;
+  try{el.setSelectionRange(Math.max(0,pos+diff),Math.max(0,pos+diff));}catch(e2){}
+  updateFeeCalc();
+}
+function parseAmt(v){return parseFloat((v||'').replace(/,/g,''))||0;}
+
+function handleAttach(files){
+  for(var i=0;i<files.length;i++){
+    attachments.push(files[i].name);
+    var li=document.createElement('div');li.className='attach-item';
+    li.innerHTML='📎 <span style="flex:1">'+files[i].name+'</span><span class="badge b-x" style="margin-right:6px">'+(files[i].size>1024?(files[i].size/1024).toFixed(0)+'KB':files[i].size+'B')+'</span><button onclick="removeAttach(this,\''+files[i].name+'\')">✕</button>';
+    document.getElementById('attach-list').appendChild(li);
+  }
+}
+function removeAttach(btn,name){btn.closest('.attach-item').remove();attachments=attachments.filter(a=>a!==name);}
+
+function submitPay(){
+  var amt=parseAmt(document.getElementById('p-amt').value);
+  var ccy=document.getElementById('p-ccy').value;
+  var recv=selRecv?selRecv.name:document.getElementById('p-recv-in').value.trim();
+  if(!recv){alert('Please select a receiver account.');return;}
+  if(!amt){alert('Please enter an amount.');return;}
+  var usdAmt=amt/FX[ccy];
+  var wval=selectedRail||'kinexys';
+  var railObj=railData.find(r=>r.id===wval)||{name:wval,provider:'',speed:'T+0',settle:''};
+  var wTxt=railObj.name;
+  var refVal=document.getElementById('p-ref').value||('PMT-'+Date.now().toString().slice(-6));
+  var type=document.getElementById('p-type').value;
+  var date=new Date();var dateStr=date.getDate()+' Mar';
+  var s=sym[ccy];
+  var amtStr=s+amt.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+  // Add to transaction log
+  var tbody=document.getElementById('pay-tbody');
+  var walletBadge=wTxt.includes('USDC')?'b-p':wTxt.includes('Orion')?'b-t':'b-b';
+  var approvalBadge=usdAmt<100000?'<span class="badge b-x">Auto-released</span>':usdAmt<500000?'<span class="badge b-b">Treasurer signed</span>':'<span class="csq">Fwded to CFO</span>';
+  var newRow=document.createElement('tr');
+  newRow.setAttribute('data-cat','bank');
+  newRow.style.background='var(--green-l)';
+  newRow.innerHTML='<td><strong>Now</strong></td><td class="c-muted">Marcus Lim</td><td>'+recv+'</td><td class="num">'+amtStr+'</td><td><span class="badge '+walletBadge+'">'+wTxt.split('(')[0].trim()+'</span></td><td><span class="badge b-g">'+( usdAmt>=500000?'Pending CFO':'Sent')+'</span></td><td>'+approvalBadge+'</td><td><button class="btn" style="font-size:10px;padding:2px 7px" onclick="downloadInvoice(\''+refVal+'\',\''+recv+'\',\''+amtStr+'\',\''+dateStr+'\',\''+wTxt+'\')">⬇ Invoice</button></td>';
+  tbody.insertBefore(newRow,tbody.firstChild);
+  setTimeout(()=>newRow.style.background='',2000);
+  // Show success modal
+  var isAuto=usdAmt<100000,isTreas=usdAmt>=100000&&usdAmt<500000,is2of2=usdAmt>=500000;
+  var railInfo={
+    kinexys:{name:'Kinexys Digital Payments',detail:'Settled via JPMorgan\'s tokenized rails. Expected settlement: T+0. Confirmation sent to '+recv+'.'},
+    orion:{name:'HSBC Orion',detail:'Routed via HSBC\'s tokenized deposit network. Expected settlement: T+0–T+1. SWIFT confirmation to follow.'},
+    citi:{name:'Citi Token Services',detail:'Processed via Citibank\'s institutional token rails. Expected settlement: T+0.'},
+    usdc:{name:'USDC / Circle',detail:'Broadcast to blockchain. Expected confirmation: ~30 seconds. USDC transferred to recipient wallet.'},
+  };
+  var wval=document.getElementById('p-wall').value;
+  var rail=railInfo[wval]||railInfo.kinexys;
+  var sm=document.getElementById('success-modal');
+  document.getElementById('success-icon').textContent=is2of2?'→':'✓';
+  document.getElementById('success-icon').style.background=is2of2?'var(--gold-l)':'var(--green-l)';
+  document.getElementById('success-icon').style.borderColor=is2of2?'#fde68a':'#86efac';
+  document.getElementById('success-title').textContent=is2of2?'Signed & forwarded to CFO':isTreas?'Payment approved & sent':'Payment auto-released';
+  document.getElementById('success-body').textContent=amtStr+' to '+recv+' · Ref: '+refVal+(attachments.length?' · '+attachments.length+' doc(s) attached':'');
+  var rb=document.getElementById('success-rail-box');
+  if(isAuto||isTreas){
+    rb.style.display='block';
+    document.getElementById('success-rail-title').textContent='✓ Sent via '+rail.name;
+    document.getElementById('success-rail-body').textContent=rail.detail;
+  } else {rb.style.display='none';}
+  sm.style.display='flex';
+  clearPay();
+}
+function closeSuccess(){document.getElementById('success-modal').style.display='none';}
+function clearPay(){
+  ['p-amt','p-ref','p-notes','p-recv-in'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p-recv-sel').style.display='none';
+  document.getElementById('p-recv-dd').style.display='none';
+  document.getElementById('p-warn').style.display='none';
+  document.getElementById('fee-box').style.display='none';
+  document.getElementById('appr-tier-box').style.display='none';
+  document.getElementById('attach-list').innerHTML='';
+  selectedRail='kinexys';
+  selSourceAcct=null;
+  buildRailPicker(0, document.getElementById('p-ccy').value);
+  var rw=document.getElementById('rail-acct-selector');if(rw)rw.style.display='none';
+  attachments=[];selRecv=null;
+}
+function fPay(cat,btn){
+  btn.closest('.card').querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('#pay-tbl tbody tr').forEach(r=>r.style.display=(cat==='all'||r.dataset.cat===cat)?'':'none');
+}
+
+// ═══ DOWNLOAD INVOICE ════════════════════════
+function downloadInvoice(ref,receiver,amount,date,wallet){
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Payment Confirmation '+ref+'</title>'
+    +'<style>body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;color:#1e293b}'
+    +'.hdr{background:#2563eb;color:#fff;padding:28px 32px;border-radius:10px 10px 0 0}'
+    +'.hdr h1{font-size:22px;margin:0 0 4px}.hdr p{font-size:12px;opacity:.8;margin:0}'
+    +'.body{background:#f8fafc;padding:28px 32px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 10px 10px}'
+    +'.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0;font-size:13px}'
+    +'.row:last-child{border:none;font-weight:700;font-size:15px}'
+    +'.lbl{color:#64748b}.val{font-weight:600}'
+    +'.footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:22px}'
+    +'</style></head><body>'
+    +'<div class="hdr"><h1>StableConnect Treasury</h1><p>Payment Confirmation Document</p></div>'
+    +'<div class="body">'
+    +'<div class="row"><span class="lbl">Reference</span><span class="val">'+ref+'</span></div>'
+    +'<div class="row"><span class="lbl">Receiver</span><span class="val">'+receiver+'</span></div>'
+    +'<div class="row"><span class="lbl">Amount</span><span class="val">'+amount+'</span></div>'
+    +'<div class="row"><span class="lbl">Payment date</span><span class="val">'+date+'</span></div>'
+    +'<div class="row"><span class="lbl">Payment rail</span><span class="val">'+wallet+'</span></div>'
+    +'<div class="row"><span class="lbl">Approved by</span><span class="val">Marcus Lim — Treasurer, StableConnect</span></div>'
+    +'<div class="row"><span class="lbl">Status</span><span class="val" style="color:#16a34a">✓ Confirmed / In Progress</span></div>'
+    +'</div>'
+    +'<div class="footer">Generated by StableConnect Treasury Dashboard · '+new Date().toISOString().slice(0,10)+'</div>'
+    +'</body></html>';
+  var blob=new Blob([html],{type:'text/html'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Invoice_'+ref+'.html';a.click();
+}
+
+// ═══ BATCH PAYMENTS ══════════════════════════
+function toggleBatch(){var s=document.getElementById('batch-section');s.style.display=s.style.display==='none'?'block':'none';}
+function handleDrop(e){e.preventDefault();document.getElementById('upload-zone').classList.remove('drag-over');handleFileUpload(e.dataTransfer.files[0]);}
+function handleFileUpload(file){
+  if(!file)return;
+  var rows=[
+    {recv:'Acme SG Pte Ltd',amt:'SGD 500,000',ccy:'SGD',wall:'HSBC Orion',ref:'Q1-FUND-001',tier:'2-of-2'},
+    {recv:'Supplier GmbH (DE)',amt:'€85,000',ccy:'EUR',wall:'HSBC Orion',ref:'INV-DE-041',tier:'Treasurer only'},
+    {recv:'James Smith',amt:'$3,200',ccy:'USD',wall:'USDC',ref:'EXP-MAR-012',tier:'Auto-release'},
+    {recv:'Taiwan Mfg Co',amt:'$450,000',ccy:'USD',wall:'Kinexys',ref:'PO-TW-109',tier:'Treasurer only'},
+    {recv:'Sarah Johnson',amt:'$1,500',ccy:'USD',wall:'USDC',ref:'EXP-MAR-013',tier:'Auto-release'},
+  ];
+  document.getElementById('batch-summary').textContent=file.name+' — '+rows.length+' transactions parsed';
+  document.getElementById('batch-tbody').innerHTML=rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+r.recv+'</td><td class="num">'+r.amt+'</td><td>'+r.ccy+'</td><td>'+r.wall+'</td><td>'+r.ref+'</td><td><span class="badge '+(r.tier==='Auto-release'?'b-g':r.tier==='Treasurer only'?'b-b':'b-a')+'">'+r.tier+'</span></td></tr>').join('');
+  document.getElementById('batch-preview').style.display='block';
+}
+function downloadTemplate(){
+  var csv='Receiver Name,Amount,Currency,Payment Type,Reference,Notes\nSupplier GmbH (DE),85000,EUR,vendor,INV-001,March invoice\nJ. Smith,3200,USD,expense,EXP-001,Employee reimbursement\n';
+  var blob=new Blob([csv],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='StableConnect_BatchPayment_Template.csv';a.click();
+}
+function submitBatch(){showToast('Batch submitted','5 payments processed — auto-release: 2, Treasurer approval: 2, 2-of-2: 1');document.getElementById('batch-preview').style.display='none';}
+function clearBatch(){document.getElementById('batch-preview').style.display='none';}
+
+// ═══ ERP MODAL ════════════════════════════════
+function openErp(){document.getElementById('erp-modal').style.display='flex';}
+function closeErp(){document.getElementById('erp-modal').style.display='none';document.getElementById('erp-prog').style.display='none';}
+function runErp(){
+  var prog=document.getElementById('erp-prog'),bar=document.getElementById('erp-bar'),st=document.getElementById('erp-st');
+  prog.style.display='block';
+  var steps=['Validating accounts…','Applying FX revaluation…','Mapping GL codes…','Building ISO 20022 / IDoc…','Transmitting to SAP S/4HANA…','Export complete ✓'];
+  var i=0,iv=setInterval(()=>{bar.style.width=(((i+1)/steps.length)*100)+'%';st.textContent=steps[i];i++;if(i>=steps.length){clearInterval(iv);setTimeout(closeErp,1200);}},450);
+}
+
+// ═══ TOAST ════════════════════════════════════
+function showToast(title,msg){
+  document.getElementById('toast-title').textContent=title;
+  document.getElementById('toast-msg').textContent=msg;
+  var t=document.getElementById('toast');t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// Init account selector on page load
+document.addEventListener('DOMContentLoaded',function(){buildAcctSelector();});
+
+// ═══ NAVIGATION ═══════════════════════════════
+function nav(btn,pageId){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  if(btn&&btn.classList)btn.classList.add('active');
+  var pg=document.getElementById(pageId);if(pg)pg.classList.add('active');
+  if(pageId==='pg-pos')buildPos();
+  if(pageId==='pg-ov')buildCpTable();
+}
+document.querySelectorAll('.nav-btn').forEach(function(btn,i){
+  var pages=['pg-ov','pg-pos','pg-appr','pg-pay','pg-ctrl','pg-wall','pg-recv','pg-recon','pg-genius'];
+  btn.addEventListener('click',function(){nav(this,pages[i]);});
+});
+</script>
+</body>
+</html>
